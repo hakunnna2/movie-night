@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ArrowLeft, Calendar, Film, Tv, Ticket } from 'lucide-react';
 import { MovieEntry } from '../types';
 import { StarRating } from '../components/StarRating';
@@ -9,6 +9,12 @@ interface DetailsProps {
 }
 
 export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
+  const [imgError, setImgError] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+
+  // Combine story/reason logic. Use story if available, else reason.
+  const textContent = entry.story || entry.reason;
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 animate-fade-in">
       <button 
@@ -23,11 +29,20 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
         <div className="md:flex">
           {/* Image Section */}
           <div className="md:w-5/12 min-h-[400px] bg-night-900 relative">
-            {entry.posterUrl ? (
+             {/* Loading Skeleton */}
+             {!imgLoaded && !imgError && (
+                 <div className="absolute inset-0 bg-night-800 animate-pulse z-10 flex items-center justify-center">
+                     <Film size={48} className="text-night-700 opacity-50"/>
+                 </div>
+             )}
+
+            {entry.posterUrl && !imgError ? (
               <img 
                 src={entry.posterUrl} 
                 alt={entry.title} 
-                className="w-full h-full object-cover opacity-90"
+                onLoad={() => setImgLoaded(true)}
+                onError={() => setImgError(true)}
+                className={`w-full h-full object-cover transition-opacity duration-700 ${imgLoaded ? 'opacity-90' : 'opacity-0'}`}
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center text-night-700">
@@ -35,7 +50,7 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
                  <span className="font-bold uppercase tracking-wider text-sm opacity-50">No Poster</span>
               </div>
             )}
-             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-night-800 md:bg-gradient-to-r md:from-transparent md:to-night-800 opacity-50"></div>
+             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-night-800 md:bg-gradient-to-r md:from-transparent md:to-night-800 opacity-50 pointer-events-none"></div>
           </div>
 
           {/* Content Section */}
@@ -55,28 +70,23 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
               {entry.title}
             </h1>
 
-            {entry.status === 'watched' ? (
-              <div className="mb-8">
+            {/* Rating Section - Only for Watched */}
+            {entry.status === 'watched' && (
                 <div className="mb-8 flex items-center gap-4 bg-night-900/50 p-4 rounded-xl w-fit border border-night-700">
                     <span className="text-ink-300 font-bold text-xs uppercase tracking-wider">Our Rating</span>
                     <div className="h-4 w-[1px] bg-night-700"></div>
                     <StarRating rating={entry.rating || 0} size={20} />
                 </div>
-                
-                {entry.story && (
-                  <div className="relative">
-                    <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-popcorn to-dream rounded-full opacity-50"></div>
-                    <p className="text-xl text-ink-200 font-hand leading-relaxed italic pl-2">
-                      "{entry.story}"
-                    </p>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="mb-8 p-6 bg-night-900 rounded-xl border border-night-700/50">
-                <h3 className="text-dream text-xs font-bold uppercase mb-2 tracking-widest">Can't wait, are you excited!!</h3>
-                <p className="text-ink-200 leading-relaxed">{entry.reason}</p>
-              </div>
+            )}
+            
+            {/* Story/Reason Section - Unified Style */}
+            {textContent && (
+                <div className="relative mb-8">
+                <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-popcorn to-dream rounded-full opacity-50"></div>
+                <p className="text-xl text-ink-200 font-hand leading-relaxed italic pl-2">
+                    "{textContent}"
+                </p>
+                </div>
             )}
           </div>
         </div>
