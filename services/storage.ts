@@ -10,7 +10,7 @@ export const BLOG_ENTRIES: MovieEntry[] = [
     date: '2025-12-04',
     rating: 4,
     story: "We expected a light and funny movie night, but EXIT surprised us. When a strange toxic gas spreads through the city, two ordinary people are forced to escape using creativity, teamwork, and courage. The movie balances tension and humor really well, keeping us stressed and smiling at the same time. By the end, it felt hopeful and energetic, the kind of movie that makes a movie night memorable.",
-    posterUrl: '/assets/exit 2019.jpg'
+    posterUrl: 'assets/exit 2019.jpg'
   },
   {
     id: '2',
@@ -20,7 +20,7 @@ export const BLOG_ENTRIES: MovieEntry[] = [
     date: '2025-12-12',
     rating: 4,
     story: "What started as a normal drive quickly turned into a tense movie night. After a tunnel suddenly collapses, one man is trapped underground with limited time and hope. While rescue teams struggle outside, the movie focuses on patience, mental strength, and the quiet fight to stay alive. It’s a slow, heavy story that left us silent for a moment after it ended.",
-    posterUrl: '/assets/tunnel 2016.jpg'
+    posterUrl: 'assets/tunnel 2016.jpg'
   },
   {
     id: '3',
@@ -30,7 +30,7 @@ export const BLOG_ENTRIES: MovieEntry[] = [
     date: '2025-12-18',
     rating: 4,
     story: "This movie felt simple and quiet, but it stayed with us. It follows two children whose daily walk to school is full of challenges, turning an ordinary routine into a test of courage and responsibility. The story shows childhood, family care, and the value of education in a very honest way. It’s calm, emotional, and reminds you how small efforts can mean everything.",
-    posterUrl: '/assets/walking to school 2009.jpg'
+    posterUrl: 'assets/walking to school 2009.jpg'
   },
   
   
