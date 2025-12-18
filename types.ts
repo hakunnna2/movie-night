@@ -1,22 +1,38 @@
 export type MediaType = 'movie' | 'tv';
 export type WatchStatus = 'watched' | 'upcoming';
 
+export interface Episode {
+  number: number;
+  title: string;
+  summary: string;
+}
+
+export interface VideoMedia {
+  title: string;
+  url: string; // Embed URL (e.g. YouTube embed link)
+}
+
 export interface MovieEntry {
   id: string;
   title: string;
   type: MediaType;
   status: WatchStatus;
+  genres?: string[];
   date: string; // ISO string for sorting
   rating?: number; // 1-5, only for watched
   story?: string; // Memory/Story, only for watched
   reason?: string; // Reason to watch, only for upcoming
-  posterUrl?: string; // Optional image URL
+  posterUrl?: string; // Web URL (https://...) or Local Path (/images/movie.jpg)
+  duration?: string; // e.g., "2h 11m"
+  episodes?: Episode[]; // Array of episodes for TV shows
+  captures?: string[]; // Array of image URLs for the gallery
+  videos?: VideoMedia[]; // Array of video trailers/clips
 }
 
 export type SortOption = 'date-desc' | 'date-asc' | 'rating-desc';
 export type FilterType = 'all' | 'movie' | 'tv';
 
 export interface ViewState {
-  current: 'home' | 'add' | 'details';
+  current: 'home' | 'details';
   selectedId?: string;
 }

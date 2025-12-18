@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Calendar, Film, Tv, Ticket } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ArrowLeft, Star, Play, Plus, List, Image as ImageIcon, PlayCircle, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { MovieEntry } from '../types';
-import { StarRating } from '../components/StarRating';
 
 interface DetailsProps {
   entry: MovieEntry;
@@ -9,85 +8,262 @@ interface DetailsProps {
 }
 
 export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
-  const [imgError, setImgError] = useState(false);
-  const [imgLoaded, setImgLoaded] = useState(false);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
+  const isTv = entry.type === 'tv';
+  const isWatched = entry.status === 'watched';
+  const year = new Date(entry.date).getFullYear();
 
-  // Combine story/reason logic. Use story if available, else reason.
-  const textContent = entry.story || entry.reason;
+  const handleNext = useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (selectedPhotoIndex !== null && entry.captures) {
+      setSelectedPhotoIndex((selectedPhotoIndex + 1) % entry.captures.length);
+    }
+  }, [selectedPhotoIndex, entry.captures]);
+
+  const handlePrev = useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (selectedPhotoIndex !== null && entry.captures) {
+      setSelectedPhotoIndex((selectedPhotoIndex - 1 + entry.captures.length) % entry.captures.length);
+    }
+  }, [selectedPhotoIndex, entry.captures]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (selectedPhotoIndex === null) return;
+      if (e.key === 'ArrowRight') handleNext();
+      if (e.key === 'ArrowLeft') handlePrev();
+      if (e.key === 'Escape') setSelectedPhotoIndex(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedPhotoIndex, handleNext, handlePrev]);
+
+  const currentPhoto = selectedPhotoIndex !== null ? entry.captures?.[selectedPhotoIndex] : null;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 animate-fade-in">
-      <button 
-        onClick={onBack}
-        className="flex items-center text-ink-300 hover:text-popcorn transition-colors mb-6 font-bold text-sm uppercase tracking-wide"
-      >
-        <ArrowLeft size={18} className="mr-2" />
-        Back to Library
-      </button>
+    <div className="min-h-screen bg-[#0f172a] text-ink-100 pb-20">
+      {/* Photo Lightbox Modal */}
+      {currentPhoto && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md animate-in fade-in duration-300"
+          onClick={() => setSelectedPhotoIndex(null)}
+        >
+          <button 
+            className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors z-[60]"
+            onClick={() => setSelectedPhotoIndex(null)}
+          >
+            <X size={40} />
+          </button>
 
-      <div className="bg-night-800 rounded-2xl overflow-hidden shadow-2xl border border-night-700">
-        <div className="md:flex">
-          {/* Image Section */}
-          <div className="md:w-5/12 min-h-[400px] bg-night-900 relative">
-             {/* Loading Skeleton */}
-             {!imgLoaded && !imgError && (
-                 <div className="absolute inset-0 bg-night-800 animate-pulse z-10 flex items-center justify-center">
-                     <Film size={48} className="text-night-700 opacity-50"/>
-                 </div>
-             )}
+          {/* Navigation Arrows */}
+          {entry.captures && entry.captures.length > 1 && (
+            <>
+              <button 
+                className="absolute left-4 md:left-8 p-3 rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all z-[60]"
+                onClick={handlePrev}
+              >
+                <ChevronLeft size={48} strokeWidth={1.5} />
+              </button>
+              <button 
+                className="absolute right-4 md:right-8 p-3 rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all z-[60]"
+                onClick={handleNext}
+              >
+                <ChevronRight size={48} strokeWidth={1.5} />
+              </button>
+            </>
+          )}
 
-            {entry.posterUrl && !imgError ? (
-              <img 
-                src={entry.posterUrl} 
-                alt={entry.title} 
-                onLoad={() => setImgLoaded(true)}
-                onError={() => setImgError(true)}
-                className={`w-full h-full object-cover transition-opacity duration-700 ${imgLoaded ? 'opacity-90' : 'opacity-0'}`}
-              />
-            ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center text-night-700">
-                 {entry.type === 'movie' ? <Film size={64} className="mb-4" /> : <Tv size={64} className="mb-4" />}
-                 <span className="font-bold uppercase tracking-wider text-sm opacity-50">No Poster</span>
+          <div className="relative max-w-[90vw] max-h-[85vh] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+            <img 
+              src={currentPhoto} 
+              className="max-w-full max-h-[85vh] object-contain shadow-2xl rounded-sm border border-white/10 transition-all duration-300"
+              alt="Full screen capture"
+            />
+            {/* Image Counter */}
+            {entry.captures && (
+              <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-white/40 font-black text-xs uppercase tracking-[0.3em]">
+                {selectedPhotoIndex! + 1} / {entry.captures.length}
               </div>
             )}
-             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-night-800 md:bg-gradient-to-r md:from-transparent md:to-night-800 opacity-50 pointer-events-none"></div>
           </div>
+        </div>
+      )}
 
-          {/* Content Section */}
-          <div className="p-8 md:p-10 md:w-7/12 flex flex-col relative">
-            <div className="flex justify-between items-start mb-4">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest bg-night-900 text-popcorn border border-night-700">
-                    <Ticket size={12} />
-                    {entry.type === 'movie' ? 'Movie' : 'TV Show'}
-                </span>
-                <div className="text-ink-300 flex items-center gap-2 text-xs font-bold uppercase tracking-wide">
-                    <Calendar size={14} />
-                    {new Date(entry.date).toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' })}
-                </div>
-            </div>
+      {/* Top Header Section (Title & Ratings) */}
+      <div className="max-w-6xl mx-auto px-4 pt-10">
+        <button 
+          onClick={onBack}
+          className="flex items-center text-ink-300 hover:text-[#fbbf24] transition-colors mb-6 text-[10px] uppercase font-black tracking-[0.2em]"
+        >
+          <ArrowLeft size={14} className="mr-2" />
+          Back to Journal
+        </button>
 
-            <h1 className="text-3xl md:text-4xl font-extrabold text-ink-100 mb-6 leading-tight">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6">
+          <div className="flex-grow">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-sans font-normal text-white mb-2 leading-tight">
               {entry.title}
             </h1>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-ink-300 text-sm font-bold tracking-tight">
+              {entry.originalTitle && <span>Original title: {entry.originalTitle}</span>}
+              <div className="flex items-center gap-3">
+                <span>{year}</span>
+                <span>•</span>
+                <span className="border border-ink-300/30 px-1 rounded-sm text-[10px] uppercase">PG</span>
+                <span>•</span>
+                <span>{entry.duration || (isTv ? `${entry.episodes?.length || 0} Episodes` : 'N/A')}</span>
+              </div>
+            </div>
+          </div>
 
-            {/* Rating Section - Only for Watched */}
-            {entry.status === 'watched' && (
-                <div className="mb-8 flex items-center gap-4 bg-night-900/50 p-4 rounded-xl w-fit border border-night-700">
-                    <span className="text-ink-300 font-bold text-xs uppercase tracking-wider">Our Rating</span>
-                    <div className="h-4 w-[1px] bg-night-700"></div>
-                    <StarRating rating={entry.rating || 0} size={20} />
+          <div className="flex items-center gap-10 mt-8 md:mt-0">
+            {/* Your Rating */}
+            <div className="flex flex-col items-center group cursor-pointer">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-300 mb-2">YOUR RATING</span>
+              <div className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors">
+                <Star size={32} className={entry.rating && isWatched ? "fill-blue-400" : ""} />
+                <div className="flex flex-col">
+                   <span className="text-xl font-black uppercase leading-none">
+                     {entry.rating && isWatched ? `${entry.rating}/5` : 'Rate'}
+                   </span>
+                   {!isWatched && <span className="text-[9px] font-black uppercase tracking-tighter opacity-50 mt-0.5">Will Rate</span>}
                 </div>
-            )}
-            
-            {/* Story/Reason Section - Unified Style */}
-            {textContent && (
-                <div className="relative mb-8">
-                <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-popcorn to-dream rounded-full opacity-50"></div>
-                <p className="text-xl text-ink-200 font-hand leading-relaxed italic pl-2">
-                    "{textContent}"
-                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Hero Media Section (Poster + Trailer) */}
+        <div className="flex flex-col md:flex-row gap-1 mb-10 bg-black/40 rounded-xl overflow-hidden border border-white/5 shadow-2xl">
+          {/* Poster */}
+          <div className="md:w-[300px] shrink-0 relative group border-r border-white/5">
+            <img 
+              src={entry.posterUrl || 'https://via.placeholder.com/300x450'} 
+              className="w-full h-full object-cover aspect-[2/3] md:aspect-auto"
+              alt={`${entry.title} poster`}
+            />
+          </div>
+
+          {/* Trailer Preview Area */}
+          <div className="flex-grow relative aspect-video md:aspect-auto bg-[#1e293b] flex items-center justify-center group overflow-hidden">
+            {entry.videos && entry.videos.length > 0 ? (
+              <>
+                <iframe 
+                  src={entry.videos[0].url} 
+                  title={entry.videos[0].title}
+                  className="absolute inset-0 w-full h-full opacity-60 group-hover:opacity-100 transition-opacity duration-500"
+                  allowFullScreen
+                ></iframe>
+                {/* Visual Play Indicator Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:opacity-0 transition-opacity duration-300">
+                   <div className="flex flex-col items-center gap-4">
+                      <div className="w-20 h-20 rounded-full border-2 border-white flex items-center justify-center bg-black/30 backdrop-blur-xl scale-110 group-hover:scale-100 transition-transform">
+                        <Play size={36} fill="white" className="ml-1" />
+                      </div>
+                      <div className="text-center">
+                        <div className="text-white text-xl font-black uppercase tracking-widest drop-shadow-lg">Play trailer</div>
+                        <div className="text-white/70 text-sm font-bold">{entry.videos[0].title}</div>
+                      </div>
+                   </div>
                 </div>
+              </>
+            ) : (
+              <div className="text-ink-300 flex flex-col items-center opacity-30">
+                <PlayCircle size={80} className="mb-4" />
+                <span className="font-black uppercase tracking-[0.3em] text-xs">No Video Available</span>
+              </div>
             )}
+          </div>
+        </div>
+
+        {/* Info & Description */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+          <div className="lg:col-span-2">
+            {/* Genre Tags */}
+            <div className="flex flex-wrap gap-2 mb-8">
+              {entry.genres?.map((g) => (
+                <span key={g} className="px-5 py-2 rounded-full border border-white/10 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/5 cursor-pointer transition-all hover:border-[#fbbf24] hover:text-[#fbbf24]">
+                  {g}
+                </span>
+              )) || <span className="px-5 py-2 rounded-full border border-white/10 text-[11px] font-black uppercase tracking-widest text-white">General</span>}
+            </div>
+
+            <div className="relative pl-6">
+               <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#fbbf24]/30 rounded-full"></div>
+               <p className="text-2xl md:text-3xl leading-relaxed text-ink-100 font-hand italic opacity-90 mb-12">
+                 "{entry.story || entry.reason}"
+               </p>
+            </div>
+
+            <div className="h-[1px] bg-gradient-to-r from-white/10 to-transparent w-full mb-12"></div>
+
+            {/* Sub Sections (Gallery & Episodes) */}
+            {entry.captures && entry.captures.length > 0 && (
+              <section className="mb-16">
+                <h2 className="text-2xl font-black text-white mb-8 flex items-center gap-4 border-l-4 border-[#fbbf24] pl-4 uppercase tracking-tight">
+                  Captures
+                  <span className="text-ink-300 text-sm font-bold tracking-widest lowercase opacity-40">{entry.captures.length} frames</span>
+                </h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {entry.captures.map((url, idx) => (
+                    <div 
+                      key={idx} 
+                      className="aspect-video bg-[#1a2332] rounded-lg overflow-hidden cursor-zoom-in border border-white/5 shadow-lg group relative"
+                      onClick={() => setSelectedPhotoIndex(idx)}
+                    >
+                      <img 
+                        src={url} 
+                        className="w-full h-full object-cover opacity-70 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" 
+                        alt={`Capture ${idx + 1}`}
+                      />
+                      <div className="absolute inset-0 bg-popcorn/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {isTv && entry.episodes && (
+              <section>
+                <h2 className="text-2xl font-black text-white mb-8 flex items-center gap-4 border-l-4 border-[#c084fc] pl-4 uppercase tracking-tight">
+                  Episodes
+                  <span className="text-ink-300 text-sm font-bold tracking-widest lowercase opacity-40">{entry.episodes.length} logged</span>
+                </h2>
+                <div className="space-y-4">
+                  {entry.episodes.map((ep) => (
+                    <div key={ep.number} className="bg-white/5 p-6 rounded-xl flex gap-6 hover:bg-white/10 transition-all border border-white/5 group">
+                       <span className="text-[#c084fc] font-black text-3xl opacity-40 group-hover:opacity-100 transition-opacity">
+                         {ep.number < 10 ? `0${ep.number}` : ep.number}
+                       </span>
+                       <div>
+                         <h4 className="font-extrabold text-lg text-white mb-1">{ep.title}</h4>
+                         <p className="text-sm text-ink-300 leading-relaxed opacity-80">{ep.summary}</p>
+                       </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+
+          {/* Right Sidebar */}
+          <div className="hidden lg:block space-y-10">
+            <div className="bg-white/5 p-8 rounded-2xl border border-white/5 shadow-xl backdrop-blur-sm">
+              <h3 className="text-[#fbbf24] text-[10px] font-black uppercase tracking-[0.4em] mb-6">Status Details</h3>
+              <div className="space-y-6 text-sm">
+                <div>
+                  <div className="text-ink-300 text-[10px] font-black uppercase tracking-widest mb-1.5 opacity-50">Watch Status</div>
+                  <div className="flex items-center gap-2">
+                     <div className={`w-2 h-2 rounded-full ${isWatched ? 'bg-green-400' : 'bg-[#c084fc] animate-pulse'}`}></div>
+                     <div className="text-white font-black uppercase tracking-widest">{entry.status}</div>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-ink-300 text-[10px] font-black uppercase tracking-widest mb-1.5 opacity-50">{isWatched ? 'Logged On' : 'Planned Date'}</div>
+                  <div className="text-white font-extrabold text-base">{new Date(entry.date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

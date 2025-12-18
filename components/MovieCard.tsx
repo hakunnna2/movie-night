@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Film, Tv } from 'lucide-react';
+import { Film, Tv, Clock, Star } from 'lucide-react';
 import { MovieEntry } from '../types';
 import { StarRating } from './StarRating';
 
@@ -13,41 +13,59 @@ export const MovieCard: React.FC<MovieCardProps> = ({ entry, onClick }) => {
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
 
-  // Use 'story' for watched, 'reason' for upcoming.
-  const displayText = isWatched ? entry.story : entry.reason;
+  // Use 'story' as primary, fallback to 'reason'
+  const displayText = entry.story || entry.reason;
+  
+  // Use first capture if available, otherwise fallback to poster
+  const captureImage = (entry.captures && entry.captures.length > 0) 
+    ? entry.captures[0] 
+    : entry.posterUrl;
 
   return (
     <div 
-      className="group relative bg-night-800 rounded-xl overflow-hidden shadow-ticket hover:shadow-glow hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col h-full border border-night-700/50 w-full"
+      className="group relative bg-[#1a2332] rounded-2xl overflow-hidden shadow-2xl hover:shadow-glow hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col h-full border border-white/5 w-full"
       onClick={onClick}
     >
-      {/* Poster / Top Section */}
-      <div className="h-40 w-full bg-night-900 relative overflow-hidden">
-        {/* Loading Skeleton */}
-        {!imgLoaded && !imgError && (
-           <div className="absolute inset-0 bg-night-800 animate-pulse flex items-center justify-center z-10">
-              <Film size={20} className="text-night-700 opacity-50" />
-           </div>
-        )}
+      {/* Header Section: Poster + Capture */}
+      <div className="relative h-44 w-full bg-[#0f172a] overflow-hidden flex">
+        {/* Capture Image Background (Right Side) */}
+        <div className="absolute inset-0 left-1/4">
+           {captureImage && !imgError ? (
+            <img 
+              src={captureImage} 
+              alt={`${entry.title} capture`} 
+              className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500"
+              onLoad={() => setImgLoaded(true)}
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <div className="w-full h-full bg-[#0f172a]" />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a] via-transparent to-transparent"></div>
+        </div>
 
-        {entry.posterUrl && !imgError ? (
-          <img 
-            src={entry.posterUrl} 
-            alt={entry.title} 
-            loading="lazy"
-            onLoad={() => setImgLoaded(true)}
-            onError={() => setImgError(true)}
-            className={`w-full h-full object-cover transition-opacity duration-700 ${imgLoaded ? 'opacity-80 group-hover:opacity-100' : 'opacity-0'}`}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-night-900">
-            {entry.type === 'movie' ? <Film size={40} className="text-night-700" /> : <Tv size={40} className="text-night-700" />}
+        {/* Poster Image (Left Side - "Main" element) */}
+        <div className="relative z-10 w-1/3 h-full p-2">
+            <div className="w-full h-full rounded-md overflow-hidden shadow-lg border border-white/10">
+                <img 
+                  src={entry.posterUrl || 'https://via.placeholder.com/150x225'} 
+                  alt={entry.title} 
+                  className="w-full h-full object-cover"
+                />
+            </div>
+        </div>
+
+        {/* Duration Badge (Top Left) */}
+        <div className="absolute top-3 left-1/3 ml-2 z-20">
+          <div className="bg-black/60 backdrop-blur-md text-[#fbbf24] text-[9px] font-black px-2 py-1 rounded-full flex items-center gap-1.5 border border-white/10 uppercase tracking-widest shadow-lg">
+             {entry.type === 'movie' ? <Clock size={10} /> : <Film size={10} />}
+             {entry.type === 'movie' ? (entry.duration || 'N/A') : `${entry.episodes?.length || 0} EPS`}
           </div>
-        )}
-        
-        {/* Date Badge (Ticket Stamp) */}
-        <div className="absolute top-0 right-4 bg-popcorn text-night-900 px-2 pt-1 pb-1.5 rounded-b-lg shadow-lg z-20">
-          <div className="text-[10px] font-black uppercase tracking-wider text-center leading-none">
+        </div>
+
+        {/* Date Badge (Top Right) */}
+        <div className="absolute top-0 right-4 bg-[#fbbf24] text-night-900 px-2.5 pt-1.5 pb-2 rounded-b-lg shadow-xl z-20">
+          <div className="text-[10px] font-black uppercase tracking-widest text-center leading-none mb-0.5">
             {new Date(entry.date).toLocaleDateString(undefined, { month: 'short' })}
           </div>
           <div className="text-lg font-black text-center leading-none">
@@ -56,44 +74,32 @@ export const MovieCard: React.FC<MovieCardProps> = ({ entry, onClick }) => {
         </div>
       </div>
 
-      {/* Perforation Line */}
-      <div className="relative w-full h-4 bg-night-800 flex items-center justify-between">
-        <div className="w-4 h-4 bg-night-900 rounded-full -ml-2"></div>
-        <div className="h-[1px] w-full border-t-2 border-dashed border-night-700 mx-1"></div>
-        <div className="w-4 h-4 bg-night-900 rounded-full -mr-2"></div>
-      </div>
-
       {/* Content Section */}
-      <div className="p-4 pt-1 flex flex-col flex-grow">
-        <div className="flex justify-between items-start mb-2">
-            <h3 className="text-lg font-bold text-ink-100 leading-tight line-clamp-2 group-hover:text-popcorn transition-colors">
-            {entry.title}
-            </h3>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-night-700 border border-night-700 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">
-                {entry.type}
-            </span>
+      <div className="p-5 flex flex-col flex-grow bg-[#1a2332]">
+        <h3 className="text-lg font-extrabold text-white leading-tight mb-1 group-hover:text-[#fbbf24] transition-colors">
+          {entry.title}
+        </h3>
+        
+        {/* Genre Row */}
+        <div className="flex items-center gap-2 mb-4">
+             <span className="text-[10px] text-ink-300 font-black uppercase tracking-[0.2em]">
+                 {entry.genres?.[0] || 'DRAMA'}
+             </span>
         </div>
 
-        <div className="mt-auto">
-          {/* Rating - Only show if watched */}
+        <div className="mt-auto space-y-4">
+          {/* Your Star Rating (Only for Watched) */}
           {isWatched && (
-            <div className="mb-2">
+            <div className="flex">
               <StarRating rating={entry.rating || 0} size={14} />
             </div>
           )}
           
-          {/* Text Content - Unified style for Story (watched) and Reason (upcoming) */}
-          {displayText ? (
-            <p className="text-sm text-ink-300 font-hand italic line-clamp-2 leading-snug">
+          {/* Story Snippet */}
+          {displayText && (
+            <p className="text-sm text-ink-300 font-hand italic line-clamp-2 leading-relaxed opacity-80 border-l-2 border-white/5 pl-3">
               "{displayText}"
             </p>
-          ) : (
-             /* Placeholder for upcoming if no reason is added */
-             !isWatched && (
-               <p className="text-sm text-ink-300 font-hand italic opacity-50">
-                 Planned...
-               </p>
-             )
           )}
         </div>
       </div>
