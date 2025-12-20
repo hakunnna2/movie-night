@@ -10,7 +10,7 @@ const PasswordGate: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
   const [error, setError] = useState(false);
 
   // The secret ticket code to enter the site
-  const SECRET_PASSWORD = '02JOJO22';
+  const SECRET_PASSWORD = '02JOJO05';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
