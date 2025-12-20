@@ -55,7 +55,7 @@ const PasswordGate: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
             type="submit"
             className="w-full bg-popcorn hover:bg-popcorn-glow text-night-900 font-black py-4 rounded-xl uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-popcorn/20"
           >
-            Enter Theater
+            Enter JoJo's World
           </button>
         </form>
 
