@@ -35,7 +35,7 @@ const PasswordGate: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
         
         <div className="space-y-2">
           <h1 className="text-3xl font-black text-white tracking-tight uppercase">Private Screening</h1>
-          <p className="text-ink-300 font-hand text-xl italic">JoJo, please your ticket code to enter.</p>
+          <p className="text-ink-300 font-hand text-xl italic">Please enter your ticket code to enter.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -55,7 +55,7 @@ const PasswordGate: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
             type="submit"
             className="w-full bg-popcorn hover:bg-popcorn-glow text-night-900 font-black py-4 rounded-xl uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-popcorn/20"
           >
-            Enter JoJo's World
+            Enter Theater
           </button>
         </form>
 
@@ -71,8 +71,9 @@ const App: React.FC = () => {
   const [entries, setEntries] = useState<MovieEntry[]>([]);
   const [viewState, setViewState] = useState<ViewState>({ current: 'home' });
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    // Check if user already unlocked in this session
-    return sessionStorage.getItem('unlocked') === 'true';
+    // Check if user already unlocked. Using localStorage ensures it stays unlocked 
+    // even after closing the tab or refreshing the page.
+    return localStorage.getItem('unlocked') === 'true';
   });
 
   // Load static data on mount
@@ -82,7 +83,7 @@ const App: React.FC = () => {
 
   const handleUnlock = () => {
     setIsAuthenticated(true);
-    sessionStorage.setItem('unlocked', 'true');
+    localStorage.setItem('unlocked', 'true');
   };
 
   // Navigation handlers
