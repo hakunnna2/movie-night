@@ -71,9 +71,11 @@ const App: React.FC = () => {
   const [entries, setEntries] = useState<MovieEntry[]>([]);
   const [viewState, setViewState] = useState<ViewState>({ current: 'home' });
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    // Check if user already unlocked. Using localStorage ensures it stays unlocked 
-    // even after closing the tab or refreshing the page.
-    return localStorage.getItem('unlocked') === 'true';
+    try {
+      return typeof window !== 'undefined' && localStorage.getItem('unlocked') === 'true';
+    } catch (e) {
+      return false;
+    }
   });
 
   // Load static data on mount

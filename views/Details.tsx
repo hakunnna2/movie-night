@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Star, Play, Plus, List, Image as ImageIcon, PlayCircle, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Star, Plus, List, Image as ImageIcon, PlayCircle, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { MovieEntry } from '../types';
 
 interface DetailsProps {
@@ -12,6 +12,46 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
   const isTv = entry.type === 'tv';
   const isWatched = entry.status === 'watched';
   const year = new Date(entry.date).getFullYear();
+
+  const onImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = e.currentTarget;
+    target.onerror = null;
+    target.src = 'https://via.placeholder.com/800x450?text=Image+Unavailable';
+  };
+
+  const safeVideoUrl = entry.videos && entry.videos.length > 0 && /^https?:\/\//.test(entry.videos[0].url)
+    ? entry.videos[0].url
+    : null;
+
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [iframeFailed, setIframeFailed] = useState(false);
+
+  // Show a helpful external link for YouTube if embed fails or as a quick fallback
+  const getExternalVideoLink = (url?: string) => {
+    if (!url) return null;
+    try {
+      const u = new URL(url, window.location.origin);
+      // Convert embed URL to watch URL when possible
+      if (u.hostname.includes('youtube.com') && u.pathname.startsWith('/embed/')) {
+        const id = u.pathname.split('/embed/')[1];
+        if (id) return `https://www.youtube.com/watch?v=${id}`;
+      }
+      return url;
+    } catch (e) {
+      return url;
+    }
+  };
+
+  const externalVideoLink = getExternalVideoLink(safeVideoUrl || undefined);
+
+  // Simple watchdog component inlined to avoid extra file.
+  function IframeWatchdog({ setFailed, timeout = 4000 }: { setFailed: () => void; timeout?: number }) {
+    useEffect(() => {
+      const t = setTimeout(() => setFailed(), timeout);
+      return () => clearTimeout(t);
+    }, [setFailed, timeout]);
+    return null;
+  }
 
   const handleNext = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -38,17 +78,22 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedPhotoIndex, handleNext, handlePrev]);
 
+  useEffect(() => {
+    const noop = () => {};
+    return noop;
+  }, []);
+
   const currentPhoto = selectedPhotoIndex !== null ? entry.captures?.[selectedPhotoIndex] : null;
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-ink-100 pb-20">
       {/* Photo Lightbox Modal */}
       {currentPhoto && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md animate-in fade-in duration-300"
           onClick={() => setSelectedPhotoIndex(null)}
         >
-          <button 
+          <button
             className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors z-[60]"
             onClick={() => setSelectedPhotoIndex(null)}
           >
@@ -58,13 +103,13 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
           {/* Navigation Arrows */}
           {entry.captures && entry.captures.length > 1 && (
             <>
-              <button 
+              <button
                 className="absolute left-4 md:left-8 p-3 rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all z-[60]"
                 onClick={handlePrev}
               >
                 <ChevronLeft size={48} strokeWidth={1.5} />
               </button>
-              <button 
+              <button
                 className="absolute right-4 md:right-8 p-3 rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all z-[60]"
                 onClick={handleNext}
               >
@@ -74,8 +119,10 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
           )}
 
           <div className="relative max-w-[90vw] max-h-[85vh] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
-            <img 
-              src={currentPhoto} 
+            <img
+              src={currentPhoto}
+              onError={onImageError}
+              loading="lazy"
               className="max-w-full max-h-[85vh] object-contain shadow-2xl rounded-sm border border-white/10 transition-all duration-300"
               alt="Full screen capture"
             />
@@ -139,6 +186,8 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
           <div className="md:w-[300px] shrink-0 relative group border-r border-white/5">
             <img 
               src={entry.posterUrl || 'https://via.placeholder.com/300x450'} 
+              onError={onImageError}
+              loading="lazy"
               className="w-full h-full object-cover aspect-[2/3] md:aspect-auto"
               alt={`${entry.title} poster`}
             />
@@ -146,26 +195,34 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
 
           {/* Trailer Preview Area */}
           <div className="flex-grow relative aspect-video md:aspect-auto bg-[#1e293b] flex items-center justify-center group overflow-hidden">
-            {entry.videos && entry.videos.length > 0 ? (
+            {safeVideoUrl ? (
               <>
-                <iframe 
-                  src={entry.videos[0].url} 
-                  title={entry.videos[0].title}
+                <iframe
+                  src={safeVideoUrl}
+                  title={entry.videos![0].title}
                   className="absolute inset-0 w-full h-full opacity-60 group-hover:opacity-100 transition-opacity duration-500"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
+                  loading="lazy"
+                  onLoad={() => setIframeLoaded(true)}
                 ></iframe>
-                {/* Visual Play Indicator Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:opacity-0 transition-opacity duration-300">
-                   <div className="flex flex-col items-center gap-4">
-                      <div className="w-20 h-20 rounded-full border-2 border-white flex items-center justify-center bg-black/30 backdrop-blur-xl scale-110 group-hover:scale-100 transition-transform">
-                        <Play size={36} fill="white" className="ml-1" />
-                      </div>
-                      <div className="text-center">
-                        <div className="text-white text-xl font-black uppercase tracking-widest drop-shadow-lg">Play trailer</div>
-                        <div className="text-white/70 text-sm font-bold">{entry.videos[0].title}</div>
-                      </div>
-                   </div>
-                </div>
+                {/* If the embed can't play (owner disabled embedding or player error), show a visible fallback */}
+                {!iframeLoaded && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="text-ink-300 text-center opacity-0 md:opacity-100 bg-black/60 px-4 py-2 rounded-md pointer-events-auto">
+                      <div className="text-sm font-bold">Loading video...</div>
+                    </div>
+                  </div>
+                )}
+                {iframeFailed && externalVideoLink && (
+                  <div className="absolute bottom-4 right-4">
+                    <a href={externalVideoLink} target="_blank" rel="noopener noreferrer" className="bg-white/5 text-white px-3 py-2 rounded-md font-black text-sm hover:bg-white/10">Watch on YouTube</a>
+                  </div>
+                )}
+                {/* Best-effort fallback timer: if the iframe hasn't loaded after 4s, show the external link */}
+                {(!iframeLoaded && !iframeFailed) && (
+                  <IframeWatchdog setFailed={() => setIframeFailed(true)} timeout={4000} />
+                )}
               </>
             ) : (
               <div className="text-ink-300 flex flex-col items-center opacity-30">
@@ -213,6 +270,8 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
                     >
                       <img 
                         src={url} 
+                        onError={onImageError}
+                        loading="lazy"
                         className="w-full h-full object-cover opacity-70 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" 
                         alt={`Capture ${idx + 1}`}
                       />
