@@ -9,7 +9,8 @@ export interface Episode {
 
 export interface VideoMedia {
   title: string;
-  url: string; // Embed URL (e.g. YouTube embed link)
+  url: string; // Local file path or embed URL
+  type?: 'local' | 'embed'; // 'local' for file path, 'embed' for YouTube
 }
 
 export interface MovieEntry {
@@ -26,7 +27,7 @@ export interface MovieEntry {
   duration?: string; // e.g., "2h 11m"
   episodes?: Episode[]; // Array of episodes for TV shows
   captures?: string[]; // Array of image URLs for the gallery
-  videos?: VideoMedia[]; // Array of video trailers/clips
+  videos?: VideoMedia[]; // Array of video movies/trailers (local files or embeds)
 }
 
 export type SortOption = 'date-desc' | 'date-asc' | 'rating-desc';

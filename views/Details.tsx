@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Star, Plus, List, Image as ImageIcon, PlayCircle, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Star, Plus, List, Image as ImageIcon, PlayCircle, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { MovieEntry } from '../types';
 
 interface DetailsProps {
@@ -9,6 +9,7 @@ interface DetailsProps {
 
 export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
+  const [selectedEpisodeIndex, setSelectedEpisodeIndex] = useState<number>(0);
   const isTv = entry.type === 'tv';
   const isWatched = entry.status === 'watched';
   const year = new Date(entry.date).getFullYear();
@@ -19,12 +20,59 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
     target.src = 'https://via.placeholder.com/800x450?text=Image+Unavailable';
   };
 
-  const safeVideoUrl = entry.videos && entry.videos.length > 0 && /^https?:\/\//.test(entry.videos[0].url)
-    ? entry.videos[0].url
-    : null;
+  // For TV shows, get video from selected episode; for movies, get first video
+  const safeVideoUrl = isTv 
+    ? entry.videos && entry.videos[selectedEpisodeIndex] ? entry.videos[selectedEpisodeIndex].url : null
+    : entry.videos && entry.videos.length > 0 ? entry.videos[0].url : null;
+  const isLocalVideo = isTv 
+    ? entry.videos && entry.videos[selectedEpisodeIndex] && entry.videos[selectedEpisodeIndex].type === 'local'
+    : entry.videos && entry.videos.length > 0 && entry.videos[0].type === 'local';
+  
+  // Check if URL is Google Drive
+  const isGoogleDriveUrl = safeVideoUrl && safeVideoUrl.includes('drive.google.com');
+  
+  // Convert Google Drive URL to embed format if needed
+  const getEmbedUrl = (url: string) => {
+    if (url.includes('drive.google.com')) {
+      const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+      if (match && match[1]) {
+        // Use both preview and minimal UI for better embedding
+        return `https://drive.google.com/file/d/${match[1]}/preview`;
+      }
+    }
+    return url;
+  };
 
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeFailed, setIframeFailed] = useState(false);
+
+  // Reset iframe state when episode changes
+  useEffect(() => {
+    setIframeLoaded(false);
+    setIframeFailed(false);
+  }, [selectedEpisodeIndex, safeVideoUrl]);
+
+  // Get download URL for different video sources
+  const getDownloadUrl = (url: string) => {
+    if (url.includes('drive.google.com')) {
+      const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+      if (match && match[1]) {
+        return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+      }
+    }
+    return url;
+  };
+
+  const handleDownload = () => {
+    if (!safeVideoUrl) return;
+    const downloadUrl = getDownloadUrl(safeVideoUrl);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = `${entry.title}.mp4`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
 
   // Show a helpful external link for YouTube if embed fails or as a quick fallback
   const getExternalVideoLink = (url?: string) => {
@@ -177,11 +225,24 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
                 </div>
               </div>
             </div>
+
+            {/* Download Button */}
+            {safeVideoUrl && (
+              <button
+                onClick={handleDownload}
+                className="flex flex-col items-center group cursor-pointer"
+              >
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-300 mb-2">DOWNLOAD</span>
+                <div className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors">
+                  <Download size={32} />
+                </div>
+              </button>
+            )}
           </div>
         </div>
 
         {/* Hero Media Section (Poster + Trailer) */}
-        <div className="flex flex-col md:flex-row gap-1 mb-10 bg-black/40 rounded-xl overflow-hidden border border-white/5 shadow-2xl">
+        <div className="flex flex-col md:flex-row gap-1 mb-10 bg-black/40 rounded-2xl overflow-hidden border border-white/5 shadow-2xl">
           {/* Poster */}
           <div className="md:w-[300px] shrink-0 relative group border-r border-white/5">
             <img 
@@ -193,35 +254,41 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
             />
           </div>
 
-          {/* Trailer Preview Area */}
-          <div className="flex-grow relative aspect-video md:aspect-auto bg-[#1e293b] flex items-center justify-center group overflow-hidden">
+          {/* Video Preview Area - Netflix Style */}
+          <div className="flex-grow relative aspect-video md:aspect-auto bg-gradient-to-b from-[#1e293b] to-black flex items-center justify-center group overflow-hidden">
             {safeVideoUrl ? (
               <>
-                <iframe
-                  src={safeVideoUrl}
-                  title={entry.videos![0].title}
-                  className="absolute inset-0 w-full h-full opacity-60 group-hover:opacity-100 transition-opacity duration-500"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  loading="lazy"
-                  onLoad={() => setIframeLoaded(true)}
-                ></iframe>
-                {/* If the embed can't play (owner disabled embedding or player error), show a visible fallback */}
-                {!iframeLoaded && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="text-ink-300 text-center opacity-0 md:opacity-100 bg-black/60 px-4 py-2 rounded-md pointer-events-auto">
-                      <div className="text-sm font-bold">Loading video...</div>
-                    </div>
-                  </div>
-                )}
-                {iframeFailed && externalVideoLink && (
-                  <div className="absolute bottom-4 right-4">
-                    <a href={externalVideoLink} target="_blank" rel="noopener noreferrer" className="bg-white/5 text-white px-3 py-2 rounded-md font-black text-sm hover:bg-white/10">Watch on YouTube</a>
-                  </div>
-                )}
-                {/* Best-effort fallback timer: if the iframe hasn't loaded after 4s, show the external link */}
-                {(!iframeLoaded && !iframeFailed) && (
-                  <IframeWatchdog setFailed={() => setIframeFailed(true)} timeout={4000} />
+                {isLocalVideo && !isGoogleDriveUrl ? (
+                  // Local video player
+                  <video
+                    src={safeVideoUrl}
+                    controls
+                    className="absolute inset-0 w-full h-full bg-black"
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  // YouTube embed or Google Drive embed (both use iframe)
+                  <>
+                    <iframe
+                      key={`video-${selectedEpisodeIndex}`}
+                      src={getEmbedUrl(safeVideoUrl)}
+                      title={isTv && entry.videos && entry.videos[selectedEpisodeIndex] ? entry.videos[selectedEpisodeIndex].title : (entry.videos?.[0]?.title || entry.title)}
+                      className="absolute inset-0 w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      onLoad={() => setIframeLoaded(true)}
+                      onError={() => setIframeFailed(true)}
+                    ></iframe>
+                    {/* If the embed can't play (owner disabled embedding or player error), show a visible fallback */}
+                    
+                    {/* Bottom gradient overlay for Netflix-style effect */}
+                    <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
+                    {/* Best-effort fallback timer: if the iframe hasn't loaded after 4s, show the external link */}
+                    {(!iframeLoaded && !iframeFailed) && (
+                      <IframeWatchdog setFailed={() => setIframeFailed(true)} timeout={4000} />
+                    )}
+                  </>
                 )}
               </>
             ) : (
@@ -286,18 +353,49 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
               <section>
                 <h2 className="text-2xl font-black text-white mb-8 flex items-center gap-4 border-l-4 border-[#c084fc] pl-4 uppercase tracking-tight">
                   Episodes
-                  <span className="text-ink-300 text-sm font-bold tracking-widest lowercase opacity-40">{entry.episodes.length} logged</span>
+                  <span className="text-ink-300 text-sm font-bold tracking-widest lowercase opacity-40">{entry.episodes.length} total</span>
                 </h2>
-                <div className="space-y-4">
-                  {entry.episodes.map((ep) => (
-                    <div key={ep.number} className="bg-white/5 p-6 rounded-xl flex gap-6 hover:bg-white/10 transition-all border border-white/5 group">
-                       <span className="text-[#c084fc] font-black text-3xl opacity-40 group-hover:opacity-100 transition-opacity">
-                         {ep.number < 10 ? `0${ep.number}` : ep.number}
-                       </span>
-                       <div>
-                         <h4 className="font-extrabold text-lg text-white mb-1">{ep.title}</h4>
-                         <p className="text-sm text-ink-300 leading-relaxed opacity-80">{ep.summary}</p>
-                       </div>
+                
+                {/* Full-width episodes grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {entry.episodes.map((ep, idx) => (
+                    <div
+                      key={ep.number}
+                      onClick={() => setSelectedEpisodeIndex(idx)}
+                      className={`cursor-pointer rounded-xl overflow-hidden transition-all duration-300 transform ${
+                        selectedEpisodeIndex === idx 
+                          ? 'ring-4 ring-[#c084fc] scale-105 shadow-2xl shadow-[#c084fc]/50' 
+                          : 'hover:scale-105 ring-1 ring-white/10 hover:ring-white/30'
+                      }`}
+                    >
+                      {/* Episode card background */}
+                      <div className={`h-56 bg-gradient-to-br from-[#c084fc]/30 to-[#1e293b] relative overflow-hidden flex flex-col items-center justify-center ${
+                        selectedEpisodeIndex === idx 
+                          ? 'bg-gradient-to-br from-[#c084fc]/50 to-[#2d1b4e]' 
+                          : ''
+                      }`}>
+                        
+                        {/* Decorative background pattern */}
+                        <div className="absolute inset-0 opacity-10">
+                          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(192,132,252,0.5),transparent)]"></div>
+                        </div>
+                        
+                        {/* Episode content */}
+                        <div className="relative z-10 text-center flex flex-col items-center justify-center h-full px-4">
+                          <div className="text-6xl font-black text-[#c084fc] mb-4 leading-none">
+                            {ep.number < 10 ? `0${ep.number}` : ep.number}
+                          </div>
+                          <h3 className="text-lg font-bold text-white mb-3">{ep.title}</h3>
+                          <p className="text-sm text-ink-300 line-clamp-2 opacity-80">{ep.summary}</p>
+                        </div>
+
+                        {/* Play icon for selected */}
+                        {selectedEpisodeIndex === idx && (
+                          <div className="absolute top-4 right-4 bg-[#c084fc] rounded-full p-3">
+                            <PlayCircle size={24} className="text-white" fill="white" />
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

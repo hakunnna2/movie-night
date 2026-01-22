@@ -12,7 +12,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filter, setFilter, sort, s
   return (
     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8 bg-night-800/50 p-2 rounded-2xl border border-night-700/50">
       <div className="flex gap-1">
-        {(['all', 'movie', 'tv'] as FilterType[]).map((f) => (
+        {(['all', 'movie'] as FilterType[]).map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
@@ -22,7 +22,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filter, setFilter, sort, s
                 : 'text-ink-300 hover:text-ink-100 hover:bg-night-800'
             }`}
           >
-            {f === 'all' ? 'All' : f === 'movie' ? 'Movies' : 'TV'}
+            {f === 'all' ? 'All' : f === 'movie' ? 'Movies/TV' : 'TV'}
           </button>
         ))}
       </div>

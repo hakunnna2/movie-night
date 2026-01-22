@@ -25,7 +25,7 @@ export const BLOG_ENTRIES: MovieEntry[] = [
       'assets/exit 2019/captures/8.jpg'
     ],
     videos: [
-      { title: 'Official Trailer', url: 'https://www.youtube.com/embed/UXVk_04Ul3M?si=LbE6N6qF2elec3LC' }
+      { title: 'Movie', url: 'https://drive.google.com/file/d/1j2M3kB9Ie1jEHNGTyIxJ1JegYjUAedXm/view?usp=sharing', type: 'local' }
     ]
   },
   {
@@ -47,7 +47,7 @@ export const BLOG_ENTRIES: MovieEntry[] = [
       
     ],
     videos: [
-      { title: 'Official Trailer', url: 'https://www.youtube.com/embed/GTsY-ol1ays?si=GLvHU9n5JgDgbvnK' }
+      { title: 'Movie', url: 'https://drive.google.com/file/d/1cyRUJI2f5jwEkx0a8OIJKvxBEONBH5NN/preview', type: 'local' }
     ]
   },
   {
@@ -65,7 +65,7 @@ export const BLOG_ENTRIES: MovieEntry[] = [
       'assets/walking to school 2009/captures/walking to school 2009.jpg'
     ],
     videos: [
-      { title: 'Official Trailer', url: 'https://www.youtube.com/embed/MyGef-nOr40?si=oqtNarlRWFjdnDrZ' }
+      { title: 'Movie', url: 'assets/walking to school 2009/walking to school 2009.mp4', type: 'local' }
     ]
   },
   {
@@ -83,7 +83,7 @@ export const BLOG_ENTRIES: MovieEntry[] = [
       'assets/home alone 1990/captures/home alone 1990.jpg'
     ],
     videos: [
-      { title: 'Classic Trailer', url: 'https://www.youtube.com/embed/jEDaVHmw7r4?si=VxcSSOUYB9iBseGG' }
+      { title: 'Movie', url: 'assets/home alone 1990/home alone 1990.mp4', type: 'local' }
     ]
   },
   {
@@ -91,7 +91,7 @@ export const BLOG_ENTRIES: MovieEntry[] = [
     title: 'Like Stars on Earth 2007',
     type: 'movie',
     status: 'upcoming',
-    date: '2026-01-01',
+    date: '2026-01-30',
     genres: ["Drama", "Family"],
     duration: "2h 42m",
     story: "Like Stars on Earth touched us deeply. It tells the story of a young boy struggling at school, misunderstood by everyone around him, until a caring teacher helps him discover his true potential. The movie is emotional, inspiring, and beautifully reminds us that everyone shines in their own way. It’s thoughtful, heartwarming, and perfect for a reflective movie night with a friend.",
@@ -100,7 +100,61 @@ export const BLOG_ENTRIES: MovieEntry[] = [
       'assets/like on stars on earth 2007/captures/Like Stars on Earth 2007.jpg'
     ],
     videos: [
-      { title: 'Official Trailer', url: 'https://www.youtube.com/embed/2LEyl7GGU38?si=YAGLonJlUtzAa1SU' }
+      { title: 'Movie', url: 'assets/like on stars on earth 2007/like on stars on earth 2007.mp4', type: 'local' }
+    ]
+  },
+  {
+    id: '6',
+    title: 'Home Alone 2: Lost in New York 1992',
+    type: 'movie',
+    rating: 4,
+    status: 'watched',
+    date: '2026-01-19',
+    genres: ["Comedy", "Family"],
+    duration: "2h 04m",
+    story: "Kevin McCallister finds himself lost in New York City and must defend a townhouse from a pair of sophisticated burglars. The sequel maintains the charm of the original with even more elaborate traps and hilarious moments. Set in the bustling holiday season of New York, it captures the magic of the city while delivering the same playful humor we loved.",
+    posterUrl: 'assets/home alone 1992/captures/home alone 2.jpeg',
+    captures: [
+      'assets/home alone 1992/captures/home alone 2.jpeg'
+    ],
+    videos: [
+      { title: 'Movie', url: 'https://drive.google.com/file/d/1UvsqdxC-xjDJCorr7ON4rYndnzfQOHsE/view?usp=sharing', type: 'local' }
+    ]
+  },
+  {
+    id: '7',
+    title: 'Brother Episode 1',
+    type: 'movie',
+    status: 'watched',
+    date: '2026-01-20',
+    rating: 4,
+    genres: ["Drama", "Family", "Psychological"],
+    duration: "2h 30m",
+    story: "The Turkish series Abi (My Brother) revolves around the idea that family is a true test. It follows the story of Çağla, a lawyer who was pushed into her profession by the harshness of life and the absence of a real family. On the other side stands Doğan, a man from a large and wealthy family who ran away in an attempt to escape a past filled with secrets. But life forces a confrontation, and the doors to a deep relationship open, where each of them carries postponed wounds—wounds they can neither open nor close… wounds called family.",
+    posterUrl: 'assets/ABIM/abi.png',
+    captures: [
+      'assets/ABIM/abi.png'
+    ],
+    videos: [
+      { title: 'Movie', url: 'https://www.youtube.com/embed/w_5tZLsea3c?si=Qun_ZH7ilgmXmcmR', type: 'embed' }
+    ]
+  },
+  {
+    id: '8',
+    title: 'Brother Episode 2',
+    type: 'movie',
+    status: 'watched',
+    date: '2026-01-22',
+    rating: 4,
+    genres: ["Drama", "Family", "Psychological"],
+    duration: "2h 30m",
+    story: "The Turkish series Abi (My Brother) revolves around the idea that family is a true test. It follows the story of Çağla, a lawyer who was pushed into her profession by the harshness of life and the absence of a real family. On the other side stands Doğan, a man from a large and wealthy family who ran away in an attempt to escape a past filled with secrets. But life forces a confrontation, and the doors to a deep relationship open, where each of them carries postponed wounds—wounds they can neither open nor close… wounds called family.",
+    posterUrl: 'assets/ABIM/abi.png',
+    captures: [
+      'assets/ABIM/abi.png'
+    ],
+    videos: [
+      { title: 'Movie', url: 'https://www.youtube.com/embed/_846pabikZ4?si=L57BqhuqMWRV00bf', type: 'embed' }
     ]
   }
 ];
