@@ -219,24 +219,6 @@ export const BLOG_ENTRIES: MovieEntry[] = [
       "assets/top gun 2/top gun 2.jpg"
     ]
   },
-    {
-    "id": "12",
-    "title": "Flight",
-    "type": "movie",
-    "status": "upcoming",
-    "date": "2026-02-15",
-    "genres": [
-      "Drama",
-      "Thriller",
-      "Aviation"
-    ],
-    "duration": "2h 18m",
-    "reason": "Denzel Washington delivers a powerful performance as an airline pilot who miraculously crash-lands a plane after a mid-air catastrophe, saving nearly everyone on board. However, as the investigation unfolds, questions arise about what really happened. A gripping drama that explores addiction, responsibility, and redemption in the aviation world.",
-    "posterUrl": "assets/flight/captures/flight.jpg",
-    "captures": [
-      "assets/flight/captures/flight.jpg"
-    ]
-  },
   {
     "id": "13",
     "title": "Sully",
@@ -257,21 +239,6 @@ export const BLOG_ENTRIES: MovieEntry[] = [
     "videos": [
       { "title": "Movie", "url": "https://drive.google.com/file/d/12dkMYuViJyi7AiR3cbUVGDb_zN3og-wn/view?usp=sharing", "type": "local" }
     ]
-  },
-  {
-    id: '14',
-    title: 'The Aviator',
-    type: 'movie',
-    status: 'upcoming',
-    date: '2026-03-01',
-    genres: ["Drama", "Biography", "Aviation"],
-    duration: "2h 50m",
-    story: "Leonardo DiCaprio delivers an Oscar-nominated performance as Howard Hughes, the legendary aviation pioneer, filmmaker, and business tycoon. The film chronicles his ambitious aviation projects, record-breaking flights, and his descent into mental illness. A sweeping epic directed by Martin Scorsese that captures the golden age of aviation and Hollywood.",
-    posterUrl: 'assets/the aviator/captures/the aviator.jpg',
-    captures: [
-      'assets/the aviator/captures/the aviator.jpg'
-    ],
-    videos: []
   }
 ];
 
