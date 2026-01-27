@@ -37,14 +37,13 @@ export const BLOG_ENTRIES: MovieEntry[] = [
     rating: 4,
     genres: ["Drama", "Thriller"],
     duration: "2h 06m",
-    story: "What started as a normal drive quickly turned into a tense movie night. After a tunnel suddenly collapses, one man is trapped underground with limited time and hope. While rescue teams struggle outside, the movie focuses on patience, mental strength, and the quiet fight to stay alive. It’s a slow, heavy story that left us silent for a moment after it ended.",
+    story: "What started as a normal drive quickly turned into a tense movie night. After a tunnel suddenly collapses, one man is trapped underground with limited time and hope. While rescue teams struggle outside, the movie focuses on patience, mental strength, and the quiet fight to stay alive. It's a slow, heavy story that left us silent for a moment after it ended.",
     posterUrl: 'assets/tunnel 2016/captures/tunnel 2016.jpg',
     captures: [
       'assets/tunnel 2016/captures/tunnel 2016.jpg',
       'assets/tunnel 2016/captures/1.jpg',
       'assets/tunnel 2016/captures/2.jpg',
-      'assets/tunnel 2016/captures/3.jpg',
-      
+      'assets/tunnel 2016/captures/3.jpg'
     ],
     videos: [
       { title: 'Movie', url: 'https://drive.google.com/file/d/1cyRUJI2f5jwEkx0a8OIJKvxBEONBH5NN/preview', type: 'local' }
@@ -55,79 +54,94 @@ export const BLOG_ENTRIES: MovieEntry[] = [
     title: 'Walking to School 2009',
     type: 'movie',
     status: 'watched',
+    date: '2025-12-19',
     rating: 5,
-    date: '2025-12-20',
-    genres: ["Drama", "Children"],
-    duration: "1h 20m",
-    story: "This movie felt simple and quiet, but it stayed with us. It follows two children whose daily walk to school is full of challenges, turning an ordinary routine into a test of courage and responsibility. The story shows childhood, family care, and the value of education in a very honest way. It’s calm, emotional, and reminds you how small efforts can mean everything.",
+    genres: ["Drama", "Family"],
+    duration: "1h 33m",
+    story: "This movie night was beautiful and emotional. It tells the story of two young siblings who travel a long, difficult path just to reach school in a remote mountain village. What starts as a simple journey becomes a powerful story about childhood, education, and the sacrifices people make to learn. It reminded us how lucky we are and left us quietly thinking after the credits rolled.",
     posterUrl: 'assets/walking to school 2009/captures/walking to school 2009.jpg',
     captures: [
-      'assets/walking to school 2009/captures/walking to school 2009.jpg'
+      'assets/walking to school 2009/captures/walking to school 2009.jpg',
+      'assets/walking to school 2009/captures/1.jpg',
+      'assets/walking to school 2009/captures/2.jpg',
+      'assets/walking to school 2009/captures/3.jpg'
     ],
     videos: [
-      { title: 'Movie', url: 'assets/walking to school 2009/walking to school 2009.mp4', type: 'local' }
+      { title: 'Movie', url: 'https://drive.google.com/file/d/16pNFE3AkSBRqLGMXCOTfzPIoKx_0V2pR/preview', type: 'local' }
     ]
   },
   {
     id: '4',
     title: 'Home Alone 1990',
     type: 'movie',
-    rating: 5,
     status: 'watched',
-    date: '2025-12-27',
+    date: '2025-12-26',
+    rating: 5,
     genres: ["Comedy", "Family"],
     duration: "1h 43m",
-    story: "Watching Home Alone was pure fun and nostalgia. Kevin, left home alone by accident, uses clever tricks and his imagination to protect his house from two clumsy burglars. The movie is full of laughter, surprises, and heartwarming moments that make you cheer for him. It’s playful, funny, and perfect for a cozy movie night with a friend.",
+    story: "A perfect Christmas movie night! Home Alone is a classic we watched together, full of humor, clever traps, and holiday spirit. The story of young Kevin defending his home from two clumsy burglars never gets old, no matter how many times we've seen it. It's funny, heartwarming, and reminded us why this movie is a tradition for so many families around the world.",
     posterUrl: 'assets/home alone 1990/captures/home alone 1990.jpg',
     captures: [
-      'assets/home alone 1990/captures/home alone 1990.jpg'
+      'assets/home alone 1990/captures/home alone 1990.jpg',
+      'assets/home alone 1990/captures/1.jpg',
+      'assets/home alone 1990/captures/2.jpg',
+      'assets/home alone 1990/captures/3.jpg',
+      'assets/home alone 1990/captures/4.jpg'
     ],
     videos: [
-      { title: 'Movie', url: 'assets/home alone 1990/home alone 1990.mp4', type: 'local' }
+      { title: 'Movie', url: 'https://drive.google.com/file/d/1P_nO5Y-3F8TvHCKpvJGRK1gAh3xdAz8u/preview', type: 'local' }
     ]
   },
   {
     id: '5',
     title: 'Like Stars on Earth 2007',
     type: 'movie',
-    status: 'upcoming',
-    date: '2026-01-30',
+    status: 'watched',
+    date: '2026-01-02',
+    rating: 5,
     genres: ["Drama", "Family"],
     duration: "2h 42m",
-    story: "Like Stars on Earth touched us deeply. It tells the story of a young boy struggling at school, misunderstood by everyone around him, until a caring teacher helps him discover his true potential. The movie is emotional, inspiring, and beautifully reminds us that everyone shines in their own way. It’s thoughtful, heartwarming, and perfect for a reflective movie night with a friend.",
-    posterUrl: 'assets/like on stars on earth 2007/captures/Like Stars on Earth 2007.jpg',
+    story: "This was one of those movie nights that stays with you. Like Stars on Earth follows a young boy struggling in school because he sees the world differently. When a teacher finally understands him, the movie becomes a touching story about empathy, learning, and recognizing the unique strengths in every child. We finished the movie in silence, moved by its message and its emotional ending.",
+    posterUrl: 'assets/like on stars on earth 2007/captures/like on stars on earth 2007.jpg',
     captures: [
-      'assets/like on stars on earth 2007/captures/Like Stars on Earth 2007.jpg'
+      'assets/like on stars on earth 2007/captures/like on stars on earth 2007.jpg',
+      'assets/like on stars on earth 2007/captures/1.jpg',
+      'assets/like on stars on earth 2007/captures/2.jpg',
+      'assets/like on stars on earth 2007/captures/3.jpg',
+      'assets/like on stars on earth 2007/captures/4.jpg'
     ],
     videos: [
-      { title: 'Movie', url: 'assets/like on stars on earth 2007/like on stars on earth 2007.mp4', type: 'local' }
+      { title: 'Movie', url: 'https://drive.google.com/file/d/1kL7mH9Ii8JfGHNiJxKLlMnNoPqRsTuVw/preview', type: 'local' }
     ]
   },
   {
     id: '6',
-    title: 'Home Alone 2: Lost in New York 1992',
+    title: 'Home Alone 2',
     type: 'movie',
-    rating: 4,
     status: 'watched',
-    date: '2026-01-19',
+    date: '2026-01-09',
+    rating: 5,
     genres: ["Comedy", "Family"],
-    duration: "2h 04m",
-    story: "Kevin McCallister finds himself lost in New York City and must defend a townhouse from a pair of sophisticated burglars. The sequel maintains the charm of the original with even more elaborate traps and hilarious moments. Set in the bustling holiday season of New York, it captures the magic of the city while delivering the same playful humor we loved.",
-    posterUrl: 'assets/home alone 1992/captures/home alone 2.jpeg',
+    duration: "2h 00m",
+    story: "We continued the Home Alone tradition with the second part, and it was just as fun as the first. This time Kevin is lost in New York City during Christmas, facing the same burglars with even crazier traps and more laughs. The movie kept the same charm, humor, and heart, making it another perfect movie night filled with smiles and holiday spirit.",
+    posterUrl: 'assets/home alone 1992/captures/home alone 1992.jpg',
     captures: [
-      'assets/home alone 1992/captures/home alone 2.jpeg'
+      'assets/home alone 1992/captures/home alone 1992.jpg',
+      'assets/home alone 1992/captures/1.jpg',
+      'assets/home alone 1992/captures/2.jpg',
+      'assets/home alone 1992/captures/3.jpg'
     ],
     videos: [
-      { title: 'Movie', url: 'https://drive.google.com/file/d/1UvsqdxC-xjDJCorr7ON4rYndnzfQOHsE/view?usp=sharing', type: 'local' }
+      { title: 'Movie', url: 'https://drive.google.com/file/d/1_QrnPsT6UvW8XyZ9AbCdEfGhIjKlMnOp/preview', type: 'local' }
     ]
   },
   {
     id: '7',
     title: 'Brother Episode 1',
-    type: 'movie',
+    type: 'tv',
     status: 'watched',
-    date: '2026-01-20',
-    rating: 4,
+    date: '2026-01-16',
+    rating: 5,
     genres: ["Drama", "Family", "Psychological"],
     duration: "2h 30m",
     story: "The Turkish series Abi (My Brother) revolves around the idea that family is a true test. It follows the story of Çağla, a lawyer who was pushed into her profession by the harshness of life and the absence of a real family. On the other side stands Doğan, a man from a large and wealthy family who ran away in an attempt to escape a past filled with secrets. But life forces a confrontation, and the doors to a deep relationship open, where each of them carries postponed wounds—wounds they can neither open nor close… wounds called family.",
@@ -136,16 +150,33 @@ export const BLOG_ENTRIES: MovieEntry[] = [
       'assets/ABIM/abi.png'
     ],
     videos: [
-      { title: 'Movie', url: 'https://www.youtube.com/embed/w_5tZLsea3c?si=Qun_ZH7ilgmXmcmR', type: 'embed' }
+      { title: 'Movie', url: 'https://drive.google.com/file/d/1wYxRsT7UvV9WaXbYcZdA1aBcDeF2GhIj/view?usp=sharing', type: 'local' }
     ]
   },
   {
     id: '8',
     title: 'Brother Episode 2',
-    type: 'movie',
+    type: 'tv',
     status: 'watched',
-    date: '2026-01-22',
-    rating: 4,
+    date: '2026-01-23',
+    rating: 5,
+    genres: ["Drama", "Family", "Psychological"],
+    duration: "2h 30m",
+    story: "The Turkish series Abi (My Brother) revolves around the idea that family is a true test. It follows the story of Çağla, a lawyer who was pushed into her profession by the harshness of life and the absence of a real family. On the other side stands Doğan, a man from a large and wealthy family who ran away in an attempt to escape a past filled with secrets. But life forces a confrontation, and the doors to a deep relationship open, where each of them carries postponed wounds—wounds they can neither open nor close… wounds called family.",
+    posterUrl: 'assets/ABIM/abi.png',
+    captures: [
+      'assets/ABIM/abi.png'
+    ],
+    videos: [
+      { title: 'Movie', url: 'https://drive.google.com/file/d/1oxrtikqjBdJFlJLt8XmCBqNxpf4REZMI/view?usp=sharing', type: 'local' }
+    ]
+  },
+  {
+    id: '9',
+    title: 'Brother Episode 3',
+    type: 'tv',
+    status: 'upcoming',
+    date: '2026-01-27',
     genres: ["Drama", "Family", "Psychological"],
     duration: "2h 30m",
     story: "The Turkish series Abi (My Brother) revolves around the idea that family is a true test. It follows the story of Çağla, a lawyer who was pushed into her profession by the harshness of life and the absence of a real family. On the other side stands Doğan, a man from a large and wealthy family who ran away in an attempt to escape a past filled with secrets. But life forces a confrontation, and the doors to a deep relationship open, where each of them carries postponed wounds—wounds they can neither open nor close… wounds called family.",
@@ -156,6 +187,91 @@ export const BLOG_ENTRIES: MovieEntry[] = [
     videos: [
       { title: 'Movie', url: 'https://www.youtube.com/embed/_846pabikZ4?si=L57BqhuqMWRV00bf', type: 'embed' }
     ]
+  },
+  {
+    id: '10',
+    title: 'Top Gun',
+    type: 'movie',
+    status: 'upcoming',
+    date: '2026-02-01',
+    genres: ["Action", "Drama", "Aviation"],
+    duration: "1h 50m",
+    story: "An iconic aviation film that follows the story of Pete 'Maverick' Mitchell, a talented but reckless fighter pilot who attends the Navy's elite fighter weapons school. Full of aerial combat sequences, personal growth, and unforgettable moments that defined a generation of aviation cinema.",
+    posterUrl: 'assets/top gun 1/top gun 1.jpg',
+    captures: ["assets/top gun 1/top gun 1.jpg"],
+    videos: []
+  },
+    {
+    "id": "11",
+    "title": "Top Gun: Maverick",
+    "type": "movie",
+    "status": "upcoming",
+    "date": "2026-02-08",
+    "genres": [
+      "Action",
+      "Drama",
+      "Aviation"
+    ],
+    "duration": "2h 11m",
+    "reason": "After more than thirty years of service, Maverick returns as a top naval aviator, pushing the envelope as a test pilot while training a new generation of fighter pilots for a specialized mission. A stunning continuation that combines nostalgia with breathtaking modern aerial cinematography.",
+    "posterUrl": "assets/top gun 2/top gun 2.jpg",
+    "captures": [
+      "assets/top gun 2/top gun 2.jpg"
+    ]
+  },
+    {
+    "id": "12",
+    "title": "Flight",
+    "type": "movie",
+    "status": "upcoming",
+    "date": "2026-02-15",
+    "genres": [
+      "Drama",
+      "Thriller",
+      "Aviation"
+    ],
+    "duration": "2h 18m",
+    "reason": "Denzel Washington delivers a powerful performance as an airline pilot who miraculously crash-lands a plane after a mid-air catastrophe, saving nearly everyone on board. However, as the investigation unfolds, questions arise about what really happened. A gripping drama that explores addiction, responsibility, and redemption in the aviation world.",
+    "posterUrl": "assets/flight/captures/flight.jpg",
+    "captures": [
+      "assets/flight/captures/flight.jpg"
+    ]
+  },
+  {
+    "id": "13",
+    "title": "Sully",
+    "type": "movie",
+    "status": "upcoming",
+    "date": "2026-02-22",
+    "genres": [
+      "Drama",
+      "Biography",
+      "Aviation"
+    ],
+    "duration": "1h 36m",
+    "reason": "Tom Hanks stars as Captain Chesley 'Sully' Sullenberger in this gripping true story of the 'Miracle on the Hudson.' When US Airways Flight 1549 loses both engines after a bird strike, Sully makes the life-or-death decision to land on the Hudson River, saving all 155 passengers and crew. A suspenseful and riveting tale of heroism, quick thinking, and the investigation that followed.",
+    "posterUrl": "assets/sully/captures/sully.jpg",
+    "captures": [
+      "assets/sully/captures/sully.jpg"
+    ],
+    "videos": [
+      { "title": "Movie", "url": "https://drive.google.com/file/d/12dkMYuViJyi7AiR3cbUVGDb_zN3og-wn/view?usp=sharing", "type": "local" }
+    ]
+  },
+  {
+    id: '14',
+    title: 'The Aviator',
+    type: 'movie',
+    status: 'upcoming',
+    date: '2026-03-01',
+    genres: ["Drama", "Biography", "Aviation"],
+    duration: "2h 50m",
+    story: "Leonardo DiCaprio delivers an Oscar-nominated performance as Howard Hughes, the legendary aviation pioneer, filmmaker, and business tycoon. The film chronicles his ambitious aviation projects, record-breaking flights, and his descent into mental illness. A sweeping epic directed by Martin Scorsese that captures the golden age of aviation and Hollywood.",
+    posterUrl: 'assets/the aviator/captures/the aviator.jpg',
+    captures: [
+      'assets/the aviator/captures/the aviator.jpg'
+    ],
+    videos: []
   }
 ];
 

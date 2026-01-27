@@ -58,8 +58,8 @@ export const MovieCard: React.FC<MovieCardProps> = ({ entry, onClick }) => {
         {/* Duration Badge (Top Left) */}
         <div className="absolute top-3 left-1/3 ml-2 z-20">
           <div className="bg-black/60 backdrop-blur-md text-[#fbbf24] text-[9px] font-black px-2 py-1 rounded-full flex items-center gap-1.5 border border-white/10 uppercase tracking-widest shadow-lg">
-             {entry.type === 'movie' ? <Clock size={10} /> : <Film size={10} />}
-             {entry.type === 'movie' ? (entry.duration || 'N/A') : `${entry.episodes?.length || 0} EPS`}
+             <Clock size={10} />
+             {entry.duration || 'N/A'}
           </div>
         </div>
 
