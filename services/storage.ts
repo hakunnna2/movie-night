@@ -46,7 +46,7 @@ export const BLOG_ENTRIES: MovieEntry[] = [
       'assets/tunnel 2016/captures/3.jpg'
     ],
     videos: [
-      { title: 'Movie', url: 'https://drive.google.com/file/d/1cyRUJI2f5jwEkx0a8OIJKvxBEONBH5NN/preview', type: 'local' }
+      { title: 'Movie', url: 'https://drive.google.com/file/d/1_S_3ksKV5ctu1_kjQXPXz2oh-hhwozKd/view?usp=sharing', type: 'local' }
     ]
   },
   {
@@ -96,19 +96,14 @@ export const BLOG_ENTRIES: MovieEntry[] = [
     id: '5',
     title: 'Like Stars on Earth 2007',
     type: 'movie',
-    status: 'watched',
+    status: 'upcoming',
     date: '2026-01-02',
-    rating: 5,
     genres: ["Drama", "Family"],
     duration: "2h 42m",
     story: "This was one of those movie nights that stays with you. Like Stars on Earth follows a young boy struggling in school because he sees the world differently. When a teacher finally understands him, the movie becomes a touching story about empathy, learning, and recognizing the unique strengths in every child. We finished the movie in silence, moved by its message and its emotional ending.",
-    posterUrl: 'assets/like on stars on earth 2007/captures/like on stars on earth 2007.jpg',
+    posterUrl: 'assets/like on stars on earth 2007/captures/Like Stars on Earth 2007.jpg',
     captures: [
-      'assets/like on stars on earth 2007/captures/like on stars on earth 2007.jpg',
-      'assets/like on stars on earth 2007/captures/1.jpg',
-      'assets/like on stars on earth 2007/captures/2.jpg',
-      'assets/like on stars on earth 2007/captures/3.jpg',
-      'assets/like on stars on earth 2007/captures/4.jpg'
+      'assets/like on stars on earth 2007/captures/Like Stars on Earth 2007.jpg'
     ],
     videos: [
       { title: 'Movie', url: 'https://drive.google.com/file/d/1kL7mH9Ii8JfGHNiJxKLlMnNoPqRsTuVw/preview', type: 'local' }
@@ -124,12 +119,9 @@ export const BLOG_ENTRIES: MovieEntry[] = [
     genres: ["Comedy", "Family"],
     duration: "2h 00m",
     story: "We continued the Home Alone tradition with the second part, and it was just as fun as the first. This time Kevin is lost in New York City during Christmas, facing the same burglars with even crazier traps and more laughs. The movie kept the same charm, humor, and heart, making it another perfect movie night filled with smiles and holiday spirit.",
-    posterUrl: 'assets/home alone 1992/captures/home alone 1992.jpg',
+    posterUrl: 'assets/home alone 1992/captures/home alone 2.jpeg',
     captures: [
-      'assets/home alone 1992/captures/home alone 1992.jpg',
-      'assets/home alone 1992/captures/1.jpg',
-      'assets/home alone 1992/captures/2.jpg',
-      'assets/home alone 1992/captures/3.jpg'
+      'assets/home alone 1992/captures/home alone 2.jpeg'
     ],
     videos: [
       { title: 'Movie', url: 'https://drive.google.com/file/d/1_QrnPsT6UvW8XyZ9AbCdEfGhIjKlMnOp/preview', type: 'local' }
