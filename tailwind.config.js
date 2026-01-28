@@ -24,8 +24,7 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Pacifico', 'cursive'],
-        story: ['Yellowtail', 'cursive'],
+        sans: ['Funnel Sans', 'sans-serif'],
       },
     },
   },
