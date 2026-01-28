@@ -27,9 +27,6 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
   const safeVideoUrl = isTv 
     ? entry.videos && entry.videos[selectedEpisodeIndex] ? entry.videos[selectedEpisodeIndex].url : null
     : entry.videos && entry.videos.length > 0 ? entry.videos[0].url : null;
-  const subtitleUrl = isTv 
-    ? entry.videos && entry.videos[selectedEpisodeIndex] ? entry.videos[selectedEpisodeIndex].subtitles : null
-    : entry.videos && entry.videos.length > 0 ? entry.videos[0].subtitles : null;
   const isLocalVideo = isTv 
     ? entry.videos && entry.videos[selectedEpisodeIndex] && entry.videos[selectedEpisodeIndex].type === 'local'
     : entry.videos && entry.videos.length > 0 && entry.videos[0].type === 'local';
@@ -295,17 +292,7 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
                     src={safeVideoUrl}
                     controls
                     className="absolute inset-0 w-full h-full bg-black"
-                    crossOrigin="anonymous"
                   >
-                    {subtitleUrl && (
-                      <track
-                        kind="subtitles"
-                        src={subtitleUrl}
-                        srcLang="en"
-                        label="English"
-                        default
-                      />
-                    )}
                     Your browser does not support the video tag.
                   </video>
                 ) : (

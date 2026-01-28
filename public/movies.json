@@ -171,7 +171,7 @@
       "/assets/ABIM/abi.png"
     ],
     "videos": [
-      { "title": "Movie", "url": "https://drive.google.com/file/d/1_dCmvKDI60zt6iPHlX9woRYeu7x-DZa4/view?usp=sharing", "type": "local", "subtitles": "/assets/ABIM/episode3.srt" }
+      { "title": "Movie", "url": "https://www.youtube.com/embed/_846pabikZ4?si=L57BqhuqMWRV00bf", "type": "embed" }
     ]
   },
   {
@@ -199,10 +199,7 @@
     "duration": "2h 11m",
     "reason": "After more than thirty years of service, Maverick returns as a top naval aviator, pushing the envelope as a test pilot while training a new generation of fighter pilots for a specialized mission. A stunning continuation that combines nostalgia with breathtaking modern aerial cinematography.",
     "posterUrl": "/assets/top gun 2/top gun 2.jpg",
-    "captures": ["/assets/top gun 2/top gun 2.jpg"],
-    "videos": [
-      { "title": "Movie", "url": "https://drive.google.com/file/d/1miNLz4dGkYVK1Fbbe7493bzwTctul-NV/view?usp=sharing", "type": "local" }
-    ]
+    "captures": ["/assets/top gun 2/top gun 2.jpg"]
   },
   {
     "id": "13",
