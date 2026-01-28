@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useNavigate, useParams } from 'react-rout
 import { getEntriesAsync } from './services/storage';
 import { MovieEntry } from './types';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { ScrollToTopButton } from './components/ScrollToTopButton';
 
 // Lazy load views for code splitting
 const Home = lazy(() => import('./views/Home').then(m => ({ default: m.Home })));
@@ -130,6 +131,7 @@ const App: React.FC = () => {
       <BrowserRouter>
         <div className="min-h-screen bg-night-900 text-ink-100 font-sans selection:bg-popcorn selection:text-night-900">
           <AppContent />
+          <ScrollToTopButton />
         </div>
       </BrowserRouter>
     </ErrorBoundary>
