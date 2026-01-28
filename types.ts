@@ -11,6 +11,7 @@ export interface VideoMedia {
   title: string;
   url: string; // Local file path or embed URL
   type?: 'local' | 'embed'; // 'local' for file path, 'embed' for YouTube
+  subtitles?: string; // Path to SRT subtitle file
 }
 
 export interface MovieEntry {
