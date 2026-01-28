@@ -1,61 +1,147 @@
-import React, { useState, useEffect } from 'react';
-import { getEntries } from './services/storage.ts';
-import { MovieEntry, ViewState } from './types';
-import { Home } from './views/Home';
-import { Details } from './views/Details';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import { getEntriesAsync } from './services/storage';
+import { MovieEntry } from './types';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
-const App: React.FC = () => {
+// Lazy load views for code splitting
+const Home = lazy(() => import('./views/Home').then(m => ({ default: m.Home })));
+const Details = lazy(() => import('./views/Details').then(m => ({ default: m.Details })));
+const IntroPage = lazy(() => import('./views/IntroPage').then(m => ({ default: m.IntroPage })));
+
+// Loading fallback component for Suspense boundaries
+const LoadingFallback: React.FC = () => (
+  <div className="min-h-screen bg-night-900 flex items-center justify-center">
+    <div className="text-center">
+      <div className="inline-block">
+        <div className="animate-spin w-12 h-12 border-4 border-popcorn border-t-transparent rounded-full mb-4"></div>
+      </div>
+      <p className="text-ink-300 text-lg">Loading...</p>
+    </div>
+  </div>
+);
+
+const AppContent: React.FC = () => {
   const [entries, setEntries] = useState<MovieEntry[]>([]);
-  const [viewState, setViewState] = useState<ViewState>({ current: 'home' });
+  const [showIntro, setShowIntro] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const isFirstLoadRef = useRef(true);
+  const navigate = useNavigate();
 
-  // Load static data on mount and when window regains focus
+  // Load data from JSON on mount
   useEffect(() => {
-    setEntries(getEntries());
-    
-    const handleFocus = () => {
-      // Reload entries when window regains focus (coming back from entry form)
-      window.location.reload();
+    const loadData = async () => {
+      try {
+        const data = await getEntriesAsync();
+        setEntries(data);
+      } catch (error) {
+        console.error('Failed to load entries:', error);
+      } finally {
+        setLoading(false);
+      }
     };
     
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
+    loadData();
+    
+    // Hide intro after first load
+    const timer = setTimeout(() => {
+      if (isFirstLoadRef.current) {
+        isFirstLoadRef.current = false;
+      }
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   // Navigation handlers
-  const navigateTo = (view: ViewState['current'], id?: string) => {
-    setViewState({ current: view, selectedId: id });
+  const navigateTo = (view: 'home' | 'details', id?: string) => {
+    if (view === 'details' && id) {
+      navigate(`/movie/${id}`);
+    } else {
+      navigate('/');
+    }
     window.scrollTo(0, 0);
   };
 
-  // Router Logic
-  let content;
-  if (viewState.current === 'home') {
-    content = (
-      <Home 
-        entries={entries} 
-        onNavigate={navigateTo} 
-      />
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-night-900 flex items-center justify-center">
+        <div className="text-popcorn text-xl">Loading...</div>
+      </div>
     );
-  } else if (viewState.current === 'details' && viewState.selectedId) {
-    const entry = entries.find(e => e.id === viewState.selectedId);
-    if (entry) {
-      content = (
-        <Details 
-          entry={entry} 
-          onBack={() => navigateTo('home')}
-        />
-      );
-    } else {
-      navigateTo('home');
-    }
-  } else {
-      navigateTo('home');
+  }
+
+  // Router Logic
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      {showIntro && isFirstLoadRef.current ? (
+        <div className="animate-fade-in">
+          <IntroPage 
+            entries={entries}
+            onContinue={() => setShowIntro(false)}
+          />
+        </div>
+      ) : (
+        <Routes>
+          <Route 
+            path="/" 
+            element={
+              <div className="animate-fade-in">
+                <Home entries={entries} onNavigate={navigateTo} />
+              </div>
+            } 
+          />
+          <Route 
+            path="/movie/:id" 
+            element={<MovieDetails entries={entries} onBack={() => navigateTo('home')} />} 
+          />
+          <Route 
+            path="*" 
+            element={
+              <div className="animate-fade-in">
+                <Home entries={entries} onNavigate={navigateTo} />
+              </div>
+            } 
+          />
+        </Routes>
+      )}
+    </Suspense>
+  );
+};
+
+// Wrapper component to handle route params
+const MovieDetails: React.FC<{ entries: MovieEntry[]; onBack: () => void }> = ({ entries, onBack }) => {
+  const { id } = useParams<{ id: string }>();
+  const entry = entries.find(e => e.id === id);
+  
+  if (!entry) {
+    return (
+      <div className="min-h-screen bg-night-900 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl text-ink-300 mb-4">Movie not found</p>
+          <button onClick={onBack} className="px-4 py-2 bg-popcorn text-night-900 rounded-lg">
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-night-900 text-ink-100 font-sans selection:bg-popcorn selection:text-night-900">
-      {content}
+    <div className="animate-fade-in">
+      <Details entry={entry} onBack={onBack} />
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <ErrorBoundary>
+      <BrowserRouter>
+        <div className="min-h-screen bg-night-900 text-ink-100 font-sans selection:bg-popcorn selection:text-night-900">
+          <AppContent />
+        </div>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 };
 

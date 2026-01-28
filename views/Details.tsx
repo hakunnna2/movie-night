@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, Star, Plus, List, Image as ImageIcon, PlayCircle, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { MovieEntry } from '../types';
+import { ImageWithSkeleton } from '../components/ImageWithSkeleton';
+import { useSwipe } from '../hooks/useSwipe';
 
 interface DetailsProps {
   entry: MovieEntry;
@@ -131,6 +133,23 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
     return noop;
   }, []);
 
+  // Add swipe gesture support for lightbox
+  useSwipe(
+    {
+      onSwipeLeft: () => {
+        if (selectedPhotoIndex !== null && entry.captures && entry.captures.length > 1) {
+          handleNext();
+        }
+      },
+      onSwipeRight: () => {
+        if (selectedPhotoIndex !== null && entry.captures && entry.captures.length > 1) {
+          handlePrev();
+        }
+      },
+    },
+    { minSwipeDistance: 50 }
+  );
+
   const currentPhoto = selectedPhotoIndex !== null ? entry.captures?.[selectedPhotoIndex] : null;
 
   return (
@@ -138,27 +157,33 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
       {/* Photo Lightbox Modal */}
       {currentPhoto && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image lightbox"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md animate-in fade-in duration-300"
           onClick={() => setSelectedPhotoIndex(null)}
         >
           <button
-            className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors z-[60]"
+            aria-label="Close lightbox"
+            className="absolute top-4 right-4 md:top-6 md:right-6 text-white/50 hover:text-white active:text-white focus:text-white focus:outline-none focus:ring-2 focus:ring-popcorn rounded-lg p-3 min-w-[44px] min-h-[44px] transition-colors z-[60]"
             onClick={() => setSelectedPhotoIndex(null)}
           >
-            <X size={40} />
+            <X size={36} />
           </button>
 
           {/* Navigation Arrows */}
           {entry.captures && entry.captures.length > 1 && (
             <>
               <button
-                className="absolute left-4 md:left-8 p-3 rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all z-[60]"
+                aria-label="Previous image"
+                className="absolute left-2 md:left-8 p-4 min-w-[44px] min-h-[44px] rounded-full bg-white/5 hover:bg-white/10 active:bg-white/20 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-popcorn text-white/50 hover:text-white focus:text-white transition-all z-[60]"
                 onClick={handlePrev}
               >
                 <ChevronLeft size={48} strokeWidth={1.5} />
               </button>
               <button
-                className="absolute right-4 md:right-8 p-3 rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all z-[60]"
+                aria-label="Next image"
+                className="absolute right-2 md:right-8 p-4 min-w-[44px] min-h-[44px] rounded-full bg-white/5 hover:bg-white/10 active:bg-white/20 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-popcorn text-white/50 hover:text-white focus:text-white transition-all z-[60]"
                 onClick={handleNext}
               >
                 <ChevronRight size={48} strokeWidth={1.5} />
@@ -172,7 +197,7 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
               onError={onImageError}
               loading="lazy"
               className="max-w-full max-h-[85vh] object-contain shadow-2xl rounded-sm border border-white/10 transition-all duration-300"
-              alt="Full screen capture"
+              alt={`${entry.title} - Screen capture ${selectedPhotoIndex! + 1} of ${entry.captures?.length || 0}`}
             />
             {/* Image Counter */}
             {entry.captures && (
@@ -188,7 +213,8 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
       <div className="max-w-6xl mx-auto px-4 pt-10">
         <button 
           onClick={onBack}
-          className="flex items-center text-ink-300 hover:text-[#fbbf24] transition-colors mb-6 text-[10px] uppercase font-black tracking-[0.2em]"
+          aria-label="Back to journal home"
+          className="flex items-center text-ink-300 hover:text-[#fbbf24] active:text-[#fbbf24] focus:text-[#fbbf24] focus:outline-none focus:ring-2 focus:ring-popcorn rounded-lg px-3 py-2 -ml-3 min-h-[44px] transition-colors mb-6 text-[10px] uppercase font-black tracking-[0.2em]"
         >
           <ArrowLeft size={14} className="mr-2" />
           Back to Journal
@@ -230,10 +256,11 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
             {safeVideoUrl && (
               <button
                 onClick={handleDownload}
-                className="flex flex-col items-center group cursor-pointer"
+                aria-label={`Download ${entry.title} video`}
+                className="flex flex-col items-center group cursor-pointer focus:outline-none focus:ring-2 focus:ring-green-400 rounded-lg px-2 py-1"
               >
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-300 mb-2">DOWNLOAD</span>
-                <div className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors">
+                <div className="flex items-center gap-2 text-green-400 group-hover:text-green-300 group-focus:text-green-300 transition-colors">
                   <Download size={32} />
                 </div>
               </button>
@@ -245,12 +272,12 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
         <div className="flex flex-col md:flex-row gap-1 mb-10 bg-black/40 rounded-2xl overflow-hidden border border-white/5 shadow-2xl">
           {/* Poster */}
           <div className="md:w-[300px] shrink-0 relative group border-r border-white/5">
-            <img 
-              src={entry.posterUrl || 'https://via.placeholder.com/300x450'} 
-              onError={onImageError}
-              loading="lazy"
-              className="w-full h-full object-cover aspect-[2/3] md:aspect-auto"
+            <ImageWithSkeleton
+              src={entry.posterUrl || 'https://via.placeholder.com/300x450'}
               alt={`${entry.title} poster`}
+              className="w-full h-full object-cover aspect-[2/3] md:aspect-auto"
+              containerClassName="w-full h-full"
+              onError={onImageError}
             />
           </div>
 
@@ -281,6 +308,23 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
                       onError={() => setIframeFailed(true)}
                     ></iframe>
                     {/* If the embed can't play (owner disabled embedding or player error), show a visible fallback */}
+                    {iframeFailed && externalVideoLink && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/90 z-10">
+                        <div className="text-center px-6">
+                          <PlayCircle size={64} className="text-red-400 mb-4 mx-auto" />
+                          <p className="text-white font-bold text-lg mb-2">Video cannot be embedded</p>
+                          <p className="text-ink-300 text-sm mb-4">The video owner has disabled embedding</p>
+                          <a 
+                            href={externalVideoLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-block bg-red-500 hover:bg-red-600 text-white font-bold px-6 py-3 rounded-lg transition-colors"
+                          >
+                            Watch on External Site
+                          </a>
+                        </div>
+                      </div>
+                    )}
                     
                     {/* Bottom gradient overlay for Netflix-style effect */}
                     <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
@@ -427,3 +471,5 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
     </div>
   );
 };
+
+export default Details;

@@ -1,6 +1,25 @@
 import { MovieEntry } from '../types';
 
-// 📝 EDIT THIS ARRAY TO ADD YOUR MOVIES
+let cachedEntries: MovieEntry[] | null = null;
+
+// Load entries from JSON file
+export const loadEntriesFromJSON = async (): Promise<MovieEntry[]> => {
+  try {
+    const response = await fetch('/data/movies.json');
+    if (!response.ok) {
+      throw new Error('Failed to load movies data');
+    }
+    const data = await response.json();
+    cachedEntries = data;
+    return data;
+  } catch (error) {
+    console.error('Error loading movies:', error);
+    // Return empty array as fallback
+    return [];
+  }
+};
+
+// 📝 LEGACY: Fallback static data (keep for backwards compatibility)
 export const BLOG_ENTRIES: MovieEntry[] = [
   {
     id: '1',
@@ -12,17 +31,17 @@ export const BLOG_ENTRIES: MovieEntry[] = [
     genres: ["Action", "Comedy", "Drama"],
     duration: "1h 43m",
     story: "We expected a light and funny movie night, but EXIT surprised us. When a strange toxic gas spreads through the city, two ordinary people are forced to escape using creativity, teamwork, and courage. The movie balances tension and humor really well, keeping us stressed and smiling at the same time. By the end, it felt hopeful and energetic, the kind of movie that makes a movie night memorable.",
-    posterUrl: 'assets/exit 2019/captures/exit 2019.jpg',
+    posterUrl: '/assets/exit 2019/captures/exit 2019.jpg',
     captures: [
-      'assets/exit 2019/captures/exit 2019.jpg',
-      'assets/exit 2019/captures/1.jpg',
-      'assets/exit 2019/captures/2.jpg',
-      'assets/exit 2019/captures/3.jpg',
-      'assets/exit 2019/captures/4.jpg',
-      'assets/exit 2019/captures/5.jpg',
-      'assets/exit 2019/captures/6.jpg',
-      'assets/exit 2019/captures/7.jpg',
-      'assets/exit 2019/captures/8.jpg'
+      '/assets/exit 2019/captures/exit 2019.jpg',
+      '/assets/exit 2019/captures/1.jpg',
+      '/assets/exit 2019/captures/2.jpg',
+      '/assets/exit 2019/captures/3.jpg',
+      '/assets/exit 2019/captures/4.jpg',
+      '/assets/exit 2019/captures/5.jpg',
+      '/assets/exit 2019/captures/6.jpg',
+      '/assets/exit 2019/captures/7.jpg',
+      '/assets/exit 2019/captures/8.jpg'
     ],
     videos: [
       { title: 'Movie', url: 'https://drive.google.com/file/d/1j2M3kB9Ie1jEHNGTyIxJ1JegYjUAedXm/view?usp=sharing', type: 'local' }
@@ -231,12 +250,41 @@ export const BLOG_ENTRIES: MovieEntry[] = [
     "videos": [
       { "title": "Movie", "url": "https://drive.google.com/file/d/12dkMYuViJyi7AiR3cbUVGDb_zN3og-wn/view?usp=sharing", "type": "local" }
     ]
+  },
+  {
+    "id": "14",
+    "title": "The Aviator",
+    "type": "movie",
+    "status": "upcoming",
+    "date": "2026-03-01",
+    "genres": [
+      "Drama",
+      "Biography",
+      "Aviation"
+    ],
+    "duration": "2h 50m",
+    "story": "Leonardo DiCaprio delivers an Oscar-nominated performance as Howard Hughes, the legendary aviation pioneer, filmmaker, and business tycoon. The film chronicles his ambitious aviation projects, record-breaking flights, and his descent into mental illness. A sweeping epic directed by Martin Scorsese that captures the golden age of aviation and Hollywood.",
+    "posterUrl": "assets/the aviator/captures/the aviator.jpg",
+    "captures": [
+      "assets/the aviator/captures/the aviator.jpg"
+    ],
+    "videos": [
+      { "title": "Movie", "url": "https://drive.google.com/file/d/1bdEHEaiTUTkIjpMOaHVC6dd4EB8PbLn9/view?usp=sharing", "type": "local" }
+    ]
   }
 ];
 
-// Helper to get entries
+// Helper to get entries (sync version - returns cached or empty)
 export const getEntries = (): MovieEntry[] => {
-  return BLOG_ENTRIES;
+  return cachedEntries || BLOG_ENTRIES;
+};
+
+// Async version for initial load
+export const getEntriesAsync = async (): Promise<MovieEntry[]> => {
+  if (cachedEntries) {
+    return cachedEntries;
+  }
+  return await loadEntriesFromJSON();
 };
 
 // No-op for saveEntries since we are using static code

@@ -2,7 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <meta name="theme-color" content="#fbbf24" />
+    <meta name="description" content="A beautiful private cinema journal for couples" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Two Seats" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23fbbf24'/></svg>" />
     <title>Two Seats, One Screen 🎬</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -50,7 +58,20 @@
         background-color: #0f172a;
         color: #f1f5f9;
         font-family: 'Nunito', sans-serif;
+        /* Prevent pull-to-refresh on mobile */
+        overscroll-behavior-y: contain;
+        /* Improve font rendering on mobile */
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        /* Prevent text size adjustment on mobile */
+        -webkit-text-size-adjust: 100%;
       }
+      
+      /* Prevent double-tap zoom */
+      * {
+        touch-action: manipulation;
+      }
+      
       /* Custom scrollbar */
       ::-webkit-scrollbar {
         width: 8px;
@@ -71,6 +92,11 @@
         mask-image: radial-gradient(circle at center, transparent 8px, black 8.5px);
         -webkit-mask-image: radial-gradient(circle at center, transparent 8px, black 8.5px);
       }
+      
+      /* Smooth scrolling */
+      html {
+        scroll-behavior: smooth;
+      }
     </style>
   <script type="importmap">
 {
@@ -83,9 +109,114 @@
 }
 </script>
 <link rel="stylesheet" href="/index.css">
+<style>
+  @keyframes jojo-blink {
+    0%, 100% {
+      opacity: 1;
+      text-shadow: 0 0 10px #c084fc, 0 0 20px #fbbf24;
+    }
+    50% {
+      opacity: 0.7;
+      text-shadow: 0 0 20px #c084fc, 0 0 30px #fbbf24, 0 0 40px #06b6d4;
+    }
+  }
+
+  @keyframes jojo-shake {
+    0%, 100% { transform: skewX(0deg); }
+    25% { transform: skewX(-3deg); }
+    75% { transform: skewX(3deg); }
+  }
+
+  .jojo-text {
+    animation: jojo-blink 1.5s ease-in-out infinite, jojo-shake 0.3s ease-in-out 0.5s infinite;
+    background: linear-gradient(45deg, #c084fc, #fbbf24, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  @keyframes avatar-float-A {
+    0% {
+      transform: translate(-80px, -80px) scale(0.5);
+      opacity: 0;
+    }
+    50% {
+      transform: translate(-80px, -80px) scale(1.1);
+    }
+    100% {
+      transform: translate(0, 0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes avatar-float-N {
+    0% {
+      transform: translate(80px, -80px) scale(0.5);
+      opacity: 0;
+    }
+    50% {
+      transform: translate(80px, -80px) scale(1.1);
+    }
+    100% {
+      transform: translate(0, 0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes header-fade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .avatar-A {
+    animation: avatar-float-A 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .avatar-N {
+    animation: avatar-float-N 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .header-content {
+    animation: header-fade-in 1s ease-out 0.4s both;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+</style>
 </head>
   <body>
     <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
+  <script>
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('ServiceWorker registered:', registration);
+          })
+          .catch(error => {
+            console.log('ServiceWorker registration failed:', error);
+          });
+      });
+    }
+  </script>
 </body>
 </html>

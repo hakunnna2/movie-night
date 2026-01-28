@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Film, Tv, Clock, Star } from 'lucide-react';
 import { MovieEntry } from '../types';
 import { StarRating } from './StarRating';
+import { ImageWithSkeleton } from './ImageWithSkeleton';
 
 interface MovieCardProps {
   entry: MovieEntry;
   onClick: () => void;
 }
 
-export const MovieCard: React.FC<MovieCardProps> = ({ entry, onClick }) => {
+export const MovieCard: React.FC<MovieCardProps> = memo(({ entry, onClick }) => {
   const isWatched = entry.status === 'watched';
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -21,21 +22,32 @@ export const MovieCard: React.FC<MovieCardProps> = ({ entry, onClick }) => {
     ? entry.captures[0] 
     : entry.posterUrl;
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onClick();
+    }
+  };
+
   return (
     <div 
-      className="group relative bg-[#1a2332] rounded-2xl overflow-hidden shadow-2xl hover:shadow-glow hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col h-full border border-white/5 w-full"
+      role="button"
+      tabIndex={0}
+      aria-label={`View details for ${entry.title}, ${entry.type === 'movie' ? 'Movie' : 'TV Show'}, ${isWatched ? `Rated ${entry.rating} out of 5 stars` : 'Not yet watched'}`}
+      className="group relative bg-[#1a2332] rounded-2xl overflow-hidden shadow-2xl hover:shadow-glow hover:-translate-y-1 focus:shadow-glow focus:-translate-y-1 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-popcorn focus:ring-offset-2 focus:ring-offset-night-900 transition-all duration-300 cursor-pointer flex flex-col h-full border border-white/5 w-full"
       onClick={onClick}
+      onKeyDown={handleKeyPress}
     >
       {/* Header Section: Poster + Capture */}
       <div className="relative h-44 w-full bg-[#0f172a] overflow-hidden flex">
         {/* Capture Image Background (Right Side) */}
         <div className="absolute inset-0 left-1/4">
            {captureImage && !imgError ? (
-            <img 
-              src={captureImage} 
-              alt={`${entry.title} capture`} 
+            <ImageWithSkeleton
+              src={captureImage}
+              alt={`${entry.title} capture`}
               className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500"
-              onLoad={() => setImgLoaded(true)}
+              containerClassName="w-full h-full"
               onError={() => setImgError(true)}
             />
           ) : (
@@ -47,10 +59,11 @@ export const MovieCard: React.FC<MovieCardProps> = ({ entry, onClick }) => {
         {/* Poster Image (Left Side - "Main" element) */}
         <div className="relative z-10 w-1/3 h-full p-2">
             <div className="w-full h-full rounded-md overflow-hidden shadow-lg border border-white/10">
-                <img 
-                  src={entry.posterUrl || 'https://via.placeholder.com/150x225'} 
-                  alt={entry.title} 
+                <ImageWithSkeleton
+                  src={entry.posterUrl || 'https://via.placeholder.com/150x225'}
+                  alt={`${entry.title} movie poster`}
                   className="w-full h-full object-cover"
+                  containerClassName="w-full h-full"
                 />
             </div>
         </div>
@@ -105,4 +118,4 @@ export const MovieCard: React.FC<MovieCardProps> = ({ entry, onClick }) => {
       </div>
     </div>
   );
-};
+});

@@ -16,6 +16,7 @@ export interface VideoMedia {
 export interface MovieEntry {
   id: string;
   title: string;
+  originalTitle?: string; // Original title in another language
   type: MediaType;
   status: WatchStatus;
   genres?: string[];

@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { MovieEntry, FilterType, SortOption } from '../types';
 import { MovieCard } from '../components/MovieCard';
 import { FilterBar } from '../components/FilterBar';
-import { Sparkles, Ticket, Armchair } from 'lucide-react';
+import { Sparkles, Ticket, Armchair, Search, X } from 'lucide-react';
 
 interface HomeProps {
   entries: MovieEntry[];
@@ -12,21 +12,124 @@ interface HomeProps {
 export const Home: React.FC<HomeProps> = ({ entries, onNavigate }) => {
   const [filter, setFilter] = useState<FilterType>('all');
   const [sort, setSort] = useState<SortOption>('date-desc');
+  const [search, setSearch] = useState<string>('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
-  const processEntries = (status: 'watched' | 'upcoming') => {
+  const processEntries = useCallback((status: 'watched' | 'upcoming') => {
     return entries
       .filter(e => e.status === status)
       .filter(e => filter === 'all' ? true : e.type === filter)
+      .filter(e => 
+        search.trim() === '' || 
+        e.title.toLowerCase().includes(search.toLowerCase()) ||
+        e.originalTitle?.toLowerCase().includes(search.toLowerCase()) ||
+        e.genres?.some(g => g.toLowerCase().includes(search.toLowerCase())) ||
+        e.story?.toLowerCase().includes(search.toLowerCase())
+      )
       .sort((a, b) => {
         if (sort === 'date-desc') return new Date(b.date).getTime() - new Date(a.date).getTime();
         if (sort === 'date-asc') return new Date(a.date).getTime() - new Date(b.date).getTime();
         if (sort === 'rating-desc') return (b.rating || 0) - (a.rating || 0);
         return 0;
       });
-  };
+  }, [entries, filter, sort, search]);
 
-  const watchedList = useMemo(() => processEntries('watched'), [entries, filter, sort]);
-  const upcomingList = useMemo(() => processEntries('upcoming'), [entries, filter, sort]);
+  const watchedList = useMemo(() => processEntries('watched'), [entries, filter, sort, search]);
+  const upcomingList = useMemo(() => processEntries('upcoming'), [entries, filter, sort, search]);
+
+  // Get search suggestions
+  const searchSuggestions = useMemo(() => {
+    if (search.trim() === '') return [];
+    const allMatches = entries
+      .filter(e => 
+        e.title.toLowerCase().includes(search.toLowerCase()) ||
+        e.originalTitle?.toLowerCase().includes(search.toLowerCase()) ||
+        e.genres?.some(g => g.toLowerCase().includes(search.toLowerCase()))
+      )
+      .slice(0, 8); // Limit to 8 suggestions
+    return allMatches;
+  }, [entries, search]);
+
+  // Calculate time together
+  const timeTogether = useMemo(() => {
+    const watched = entries.filter(e => e.status === 'watched').sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const upcoming = entries.filter(e => e.status === 'upcoming').sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    let totalMinutes = 0;
+    let totalRating = 0;
+    let ratedCount = 0;
+    const genreMap: Record<string, number> = {};
+    let earliestDate = new Date();
+    let latestDate = new Date('2000-01-01');
+    let bestMovie = null;
+    let bestRating = 0;
+    let longestMovie = null;
+    let longestDuration = 0;
+
+    watched.forEach(entry => {
+      // Calculate duration
+      if (entry.duration) {
+        const match = entry.duration.match(/(\d+)h\s*(\d+)m/);
+        if (match) {
+          const hours = parseInt(match[1]);
+          const minutes = parseInt(match[2]);
+          const durationMinutes = hours * 60 + minutes;
+          totalMinutes += durationMinutes;
+          
+          // Track longest movie
+          if (durationMinutes > longestDuration) {
+            longestDuration = durationMinutes;
+            longestMovie = entry;
+          }
+        }
+      }
+
+      // Calculate average rating and best movie
+      if (entry.rating) {
+        totalRating += entry.rating;
+        ratedCount++;
+        if (entry.rating > bestRating) {
+          bestRating = entry.rating;
+          bestMovie = entry;
+        }
+      }
+
+      // Track genres
+      entry.genres?.forEach(genre => {
+        genreMap[genre] = (genreMap[genre] || 0) + 1;
+      });
+
+      // Track dates
+      const entryDate = new Date(entry.date);
+      if (entryDate < earliestDate) earliestDate = entryDate;
+      if (entryDate > latestDate) latestDate = entryDate;
+    });
+
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    const days = watched.length > 0 ? Math.ceil((latestDate.getTime() - earliestDate.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+    const avgRating = ratedCount > 0 ? (totalRating / ratedCount).toFixed(1) : 0;
+    const favoriteGenre = Object.entries(genreMap).sort((a, b) => b[1] - a[1])[0];
+    const avgPerMonth = watched.length > 0 && days > 0 ? (watched.length / (days / 30.44)).toFixed(1) : '0';
+    const nextMovieDate = upcoming.length > 0 ? new Date(upcoming[0].date) : null;
+    const daysUntilNext = nextMovieDate ? Math.ceil((nextMovieDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : null;
+
+    return {
+      totalMinutes,
+      hours,
+      minutes,
+      count: watched.length,
+      days,
+      avgRating,
+      favoriteGenre: favoriteGenre ? favoriteGenre[0] : 'None',
+      avgPerMonth,
+      bestMovie,
+      longestMovie,
+      nextMovie: upcoming[0],
+      daysUntilNext,
+      recentMovies: watched.slice(0, 3)
+    };
+  }, [entries]);
 
   return (
     <div className="max-w-7xl mx-auto px-6 pb-24 pt-12">
@@ -34,11 +137,11 @@ export const Home: React.FC<HomeProps> = ({ entries, onNavigate }) => {
       <header className="mb-14 flex flex-col items-center text-center gap-6">
         <div className="flex items-center justify-center gap-3 mb-2">
           <div className="flex -space-x-3">
-            <div className="w-11 h-11 rounded-full bg-[#fbbf24] flex items-center justify-center text-night-900 text-sm font-black border-4 border-[#0f172a] shadow-xl">A</div>
-            <div className="w-11 h-11 rounded-full bg-[#c084fc] flex items-center justify-center text-night-900 text-sm font-black border-4 border-[#0f172a] shadow-xl">N</div>
+            <div className="w-11 h-11 rounded-full bg-[#fbbf24] flex items-center justify-center text-night-900 text-sm font-black border-4 border-[#0f172a] shadow-xl avatar-A">A</div>
+            <div className="w-11 h-11 rounded-full bg-[#c084fc] flex items-center justify-center text-night-900 text-sm font-black border-4 border-[#0f172a] shadow-xl avatar-N">N</div>
           </div>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 header-content">
           <span className="text-[#94a3b8] text-[10px] font-black uppercase tracking-[0.5em] block">Our Private Cinema Journal</span>
           <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter">
             Two Seats, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#fbbf24] to-[#c084fc]">One Screen</span>
@@ -47,7 +150,90 @@ export const Home: React.FC<HomeProps> = ({ entries, onNavigate }) => {
             Watching life, one frame at a time.
           </p>
         </div>
+
+        {/* Premium Navigation */}
       </header>
+
+      {/* Search Bar */}
+      <div className="mb-8 relative z-50">
+        <div className="relative flex items-center">
+          <Search size={20} className="absolute left-4 text-ink-400 pointer-events-none" />
+          <input
+            type="text"
+            role="searchbox"
+            aria-label="Search movies, TV shows, genres, and stories"
+            aria-expanded={showSuggestions && search.trim() !== '' && searchSuggestions.length > 0}
+            aria-controls="search-suggestions"
+            placeholder="Search movies, TV, genres, stories..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            className="w-full bg-night-800/50 border border-night-700/50 rounded-2xl pl-12 pr-4 py-3 text-ink-100 placeholder-ink-400 focus:outline-none focus:border-popcorn/50 focus:ring-2 focus:ring-popcorn/30 transition-colors font-medium"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              aria-label="Clear search"
+              className="absolute right-4 text-ink-400 hover:text-ink-100 focus:text-ink-100 focus:outline-none focus:ring-2 focus:ring-popcorn rounded transition-colors p-1"
+            >
+              <X size={18} />
+            </button>
+          )}
+        </div>
+
+        {/* Live Search Suggestions Dropdown */}
+        {showSuggestions && search.trim() !== '' && searchSuggestions.length > 0 && (
+          <div 
+            id="search-suggestions"
+            role="listbox"
+            aria-label="Search suggestions"
+            className="absolute top-full left-0 right-0 mt-2 bg-night-800 border border-night-700/50 rounded-2xl shadow-2xl overflow-hidden z-50"
+          >
+            {searchSuggestions.map((entry) => (
+              <button
+                key={entry.id}
+                role="option"
+                aria-label={`${entry.title} - ${entry.type === 'movie' ? 'Movie' : 'TV Show'}`}
+                onClick={() => {
+                  setSearch('');
+                  setShowSuggestions(false);
+                  onNavigate('details', entry.id);
+                }}
+                className="w-full px-4 py-3 hover:bg-night-700/50 focus:bg-night-700/50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-popcorn/50 transition-colors text-left border-b border-night-700/30 last:border-b-0 flex items-center gap-3"
+              >
+                {entry.posterUrl && (
+                  <img 
+                    src={entry.posterUrl} 
+                    alt={`${entry.title} poster`}
+                    loading="lazy"
+                    className="w-10 h-14 object-cover rounded"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-ink-100 truncate">{entry.title}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[10px] text-ink-400 capitalize">{entry.type}</span>
+                    {entry.rating && (
+                      <span className="text-[10px] text-[#fbbf24]">★ {entry.rating.toFixed(1)}</span>
+                    )}
+                    {entry.genres && entry.genres.length > 0 && (
+                      <span className="text-[10px] text-ink-400">{entry.genres[0]}</span>
+                    )}
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* No Results Message */}
+        {showSuggestions && search.trim() !== '' && searchSuggestions.length === 0 && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-night-800 border border-night-700/50 rounded-2xl shadow-2xl p-4 text-center">
+            <p className="text-ink-400 text-sm">No movies found matching "{search}"</p>
+          </div>
+        )}
+      </div>
 
       <FilterBar filter={filter} setFilter={setFilter} sort={sort} setSort={setSort} />
 
@@ -133,3 +319,5 @@ export const Home: React.FC<HomeProps> = ({ entries, onNavigate }) => {
     </div>
   );
 };
+
+export default Home;

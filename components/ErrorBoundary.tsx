@@ -5,13 +5,11 @@ interface State {
 }
 
 export class ErrorBoundary extends Component<React.PropsWithChildren<{}>, State> {
-	// Explicit declarations to satisfy TS checker in this project setup
-	public props!: React.PropsWithChildren<{}>;
-	public state: State = { hasError: false };
-	public setState: any;
+	state: State = { hasError: false };
 
 	constructor(props: React.PropsWithChildren<{}>) {
 		super(props);
+		this.state = { hasError: false };
 	}
 
 	static getDerivedStateFromError(): State {
