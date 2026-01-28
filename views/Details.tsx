@@ -3,6 +3,7 @@ import { ArrowLeft, Star, Plus, List, Image as ImageIcon, PlayCircle, X, Chevron
 import { MovieEntry } from '../types';
 import { ImageWithSkeleton } from '../components/ImageWithSkeleton';
 import { useSwipe } from '../hooks/useSwipe';
+import { Breadcrumbs } from '../components/Breadcrumbs';
 
 interface DetailsProps {
   entry: MovieEntry;
@@ -67,13 +68,18 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
 
   const handleDownload = () => {
     if (!safeVideoUrl) return;
-    const downloadUrl = getDownloadUrl(safeVideoUrl);
-    const a = document.createElement('a');
-    a.href = downloadUrl;
-    a.download = `${entry.title}.mp4`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    // For Google Drive, open in new tab (can't force download)
+    if (safeVideoUrl.includes('drive.google.com')) {
+      window.open(safeVideoUrl, '_blank');
+    } else {
+      // For other sources, try to download
+      const a = document.createElement('a');
+      a.href = safeVideoUrl;
+      a.download = `${entry.title}.mp4`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
   };
 
   // Show a helpful external link for YouTube if embed fails or as a quick fallback
@@ -211,14 +217,9 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
 
       {/* Top Header Section (Title & Ratings) */}
       <div className="max-w-6xl mx-auto px-4 pt-10">
-        <button 
-          onClick={onBack}
-          aria-label="Back to journal home"
-          className="flex items-center text-ink-300 hover:text-[#fbbf24] active:text-[#fbbf24] focus:text-[#fbbf24] focus:outline-none focus:ring-2 focus:ring-popcorn rounded-lg px-3 py-2 -ml-3 min-h-[44px] transition-colors mb-6 text-[10px] uppercase font-black tracking-[0.2em]"
-        >
-          <ArrowLeft size={14} className="mr-2" />
-          Back to Journal
-        </button>
+        <div className="mb-4">
+          <Breadcrumbs items={[{ label: entry.title }]} onHome={onBack} />
+        </div>
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6">
           <div className="flex-grow">

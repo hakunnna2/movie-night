@@ -4,6 +4,7 @@ import { getEntriesAsync } from './services/storage';
 import { MovieEntry } from './types';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ScrollToTopButton } from './components/ScrollToTopButton';
+import { AppContextProvider } from './context/AppContext';
 
 // Lazy load views for code splitting
 const Home = lazy(() => import('./views/Home').then(m => ({ default: m.Home })));
@@ -129,10 +130,12 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <BrowserRouter>
-        <div className="min-h-screen bg-night-900 text-ink-100 font-sans selection:bg-popcorn selection:text-night-900">
-          <AppContent />
-          <ScrollToTopButton />
-        </div>
+        <AppContextProvider>
+          <div className="min-h-screen bg-night-900 text-ink-100 font-sans selection:bg-popcorn selection:text-night-900">
+            <AppContent />
+            <ScrollToTopButton />
+          </div>
+        </AppContextProvider>
       </BrowserRouter>
     </ErrorBoundary>
   );

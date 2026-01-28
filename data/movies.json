@@ -58,13 +58,10 @@
     "story": "This movie night was beautiful and emotional. It tells the story of two young siblings who travel a long, difficult path just to reach school in a remote mountain village. What starts as a simple journey becomes a powerful story about childhood, education, and the sacrifices people make to learn. It reminded us how lucky we are and left us quietly thinking after the credits rolled.",
     "posterUrl": "/assets/walking to school 2009/captures/walking to school 2009.jpg",
     "captures": [
-      "/assets/walking to school 2009/captures/walking to school 2009.jpg",
-      "/assets/walking to school 2009/captures/1.jpg",
-      "/assets/walking to school 2009/captures/2.jpg",
-      "/assets/walking to school 2009/captures/3.jpg"
+      "/assets/walking to school 2009/captures/walking to school 2009.jpg"
     ],
     "videos": [
-      { "title": "Movie", "url": "https://drive.google.com/file/d/16pNFE3AkSBRqLGMXCOTfzPIoKx_0V2pR/preview", "type": "local" }
+      { "title": "Movie", "url": "https://www.youtube.com/embed/TwMve9_LtbE?si=L3XOHO_pDZEhYzxZ", "type": "embed" }
     ]
   },
   {
@@ -86,7 +83,7 @@
       "/assets/home alone 1990/captures/4.jpg"
     ],
     "videos": [
-      { "title": "Movie", "url": "https://drive.google.com/file/d/1P_nO5Y-3F8TvHCKpvJGRK1gAh3xdAz8u/preview", "type": "local" }
+      { "title": "Movie", "url": "https://drive.google.com/file/d/1yF7GT_59NEPbfwZ2H59gWABF8pk5nzFH/view?usp=sharing", "type": "local" }
     ]
   },
   {
@@ -121,7 +118,7 @@
       "/assets/home alone 1992/captures/home alone 2.jpeg"
     ],
     "videos": [
-      { "title": "Movie", "url": "https://drive.google.com/file/d/1_QrnPsT6UvW8XyZ9AbCdEfGhIjKlMnOp/preview", "type": "local" }
+      { "title": "Movie", "url": "https://drive.google.com/file/d/1UvsqdxC-xjDJCorr7ON4rYndnzfQOHsE/view?usp=sharing", "type": "local" }
     ]
   },
   {
@@ -139,7 +136,7 @@
       "/assets/ABIM/abi.png"
     ],
     "videos": [
-      { "title": "Movie", "url": "https://drive.google.com/file/d/1wYxRsT7UvV9WaXbYcZdA1aBcDeF2GhIj/view?usp=sharing", "type": "local" }
+      { "title": "Movie", "url": "https://drive.google.com/file/d/1VsWGSd-Sy1VqZ2Gy90JW-nzQ19yN-zJf/view?usp=sharing", "type": "local" }
     ]
   },
   {
@@ -188,7 +185,9 @@
     "story": "An iconic aviation film that follows the story of Pete 'Maverick' Mitchell, a talented but reckless fighter pilot who attends the Navy's elite fighter weapons school. Full of aerial combat sequences, personal growth, and unforgettable moments that defined a generation of aviation cinema.",
     "posterUrl": "/assets/top gun 1/top gun 1.jpg",
     "captures": ["/assets/top gun 1/top gun 1.jpg"],
-    "videos": []
+    "videos": [
+      { "title": "Movie", "url": "https://drive.google.com/file/d/1cPE4HoZQtyEkeFB2tZTH3Iy5qcTtSn11/view?usp=sharing", "type": "local" }
+    ]
   },
   {
     "id": "11",

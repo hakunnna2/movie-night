@@ -152,7 +152,7 @@ export const IntroPage: React.FC<IntroPageProps> = ({ entries, onContinue }) => 
         </div>
       </div>
 
-      <style jsx>{`
+      <style dangerouslySetInnerHTML={{__html: `
         @keyframes avatar-float-A {
           0% {
             transform: translate(-80px, -80px) scale(0.5);
@@ -182,7 +182,7 @@ export const IntroPage: React.FC<IntroPageProps> = ({ entries, onContinue }) => 
         .avatar-N {
           animation: avatar-float-N 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
-      `}</style>
+      `}} />
     </div>
   );
 };
