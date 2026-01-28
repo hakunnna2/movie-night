@@ -1,9 +1,21 @@
+# Don't redirect files with extensions (js, css, etc)
+/*.js /index.html 404
+/*.css /index.html 404
+/*.json /index.html 404
+/*.svg /index.html 404
+/*.png /index.html 404
+/*.jpg /index.html 404
+
 # Don't redirect static assets
 /assets/* /assets/:splat 200
+
 # Don't redirect service worker and manifest
 /sw.js /sw.js 200
 /manifest.json /manifest.json 200
-# For SPA routing - only redirect HTML routes
+
+# For SPA routing - only redirect HTML routes (no file extension)
 /movie/* /index.html 200
 /details/* /index.html 200
+
+# Fallback for all other routes
 /* /index.html 200
