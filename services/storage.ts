@@ -5,7 +5,7 @@ let cachedEntries: MovieEntry[] | null = null;
 // Load entries from JSON file
 export const loadEntriesFromJSON = async (): Promise<MovieEntry[]> => {
   try {
-    const response = await fetch('/data/movies.json');
+    const response = await fetch('/movies.json');
     if (!response.ok) {
       throw new Error('Failed to load movies data');
     }
