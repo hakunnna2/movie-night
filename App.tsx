@@ -1,5 +1,5 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { getEntriesAsync } from './services/storage';
 import { MovieEntry } from './types';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -28,6 +28,7 @@ const AppContent: React.FC = () => {
   const [showIntro, setShowIntro] = useState(true);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Load data from JSON on mount
   useEffect(() => {
@@ -35,6 +36,10 @@ const AppContent: React.FC = () => {
       try {
         const data = await getEntriesAsync();
         setEntries(data);
+        // Skip intro if user is accessing a specific route directly
+        if (location.pathname !== '/') {
+          setShowIntro(false);
+        }
       } catch (error) {
         console.error('Failed to load entries:', error);
       } finally {
@@ -43,7 +48,7 @@ const AppContent: React.FC = () => {
     };
     
     loadData();
-  }, []);
+  }, [location.pathname]);
 
   // Navigation handlers
   const navigateTo = (view: 'home' | 'details', id?: string) => {
