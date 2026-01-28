@@ -173,7 +173,7 @@ const MOVIES_DATA: MovieEntry[] = [
       "/assets/ABIM/abi.png"
     ],
     "videos": [
-      { "title": "Movie", "url": "https://drive.google.com/file/d/1_dCmvKDI60zt6iPHlX9woRYeu7x-DZa4/view?usp=sharing", "type": "local" }
+      { "title": "Movie", "url": "https://drive.google.com/file/d/1MlEfhG2BzMPfSWbDaixSV5Tk7OZbFlG4/view?usp=sharing", "type": "local" }
     ]
   },
   {
@@ -235,10 +235,50 @@ const MOVIES_DATA: MovieEntry[] = [
   }
 ];
 
-export const getEntries = (): MovieEntry[] => MOVIES_DATA;
+const PROGRESS_STORAGE_KEY = 'movie-night-progress';
 
-export const getEntriesAsync = async (): Promise<MovieEntry[]> => MOVIES_DATA;
+export const getEntries = (): MovieEntry[] => {
+  const entries = [...MOVIES_DATA];
+  const progress = getProgressFromStorage();
+  return entries.map(entry => ({
+    ...entry,
+    watchProgress: progress[entry.id] || 0
+  }));
+};
+
+export const getEntriesAsync = async (): Promise<MovieEntry[]> => getEntries();
 
 export const saveEntries = (entries: MovieEntry[]): void => {
   // Static mode: changes are not saved. Edit storage.ts directly.
 };
+
+export const saveWatchProgress = (entryId: string, seconds: number): void => {
+  try {
+    const progress = getProgressFromStorage();
+    progress[entryId] = seconds;
+    localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(progress));
+  } catch (error) {
+    console.error('Failed to save watch progress:', error);
+  }
+};
+
+export const getWatchProgress = (entryId: string): number => {
+  try {
+    const progress = getProgressFromStorage();
+    return progress[entryId] || 0;
+  } catch (error) {
+    console.error('Failed to get watch progress:', error);
+    return 0;
+  }
+};
+
+const getProgressFromStorage = (): Record<string, number> => {
+  try {
+    const data = localStorage.getItem(PROGRESS_STORAGE_KEY);
+    return data ? JSON.parse(data) : {};
+  } catch (error) {
+    console.error('Failed to parse watch progress:', error);
+    return {};
+  }
+};
+

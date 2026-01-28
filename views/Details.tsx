@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback, SyntheticEvent, MouseEvent } from 'react';
+import { useState, useEffect, useCallback, SyntheticEvent, MouseEvent, useRef } from 'react';
 import { ArrowLeft, Star, Download, X, ChevronLeft, ChevronRight, PlayCircle } from 'lucide-react';
 import { MovieEntry } from '../types';
 import { ImageWithSkeleton } from '../components/ImageWithSkeleton';
 import { useSwipe } from '../hooks/useSwipe';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+import { saveWatchProgress, getWatchProgress } from '../services/storage';
 
 interface DetailsProps {
   entry: MovieEntry;
@@ -13,6 +14,7 @@ interface DetailsProps {
 export const Details = ({ entry, onBack }: DetailsProps) => {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [selectedEpisodeIndex, setSelectedEpisodeIndex] = useState<number>(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const isTv = entry.type === 'tv';
   const isWatched = entry.status === 'watched';
   const year = new Date(entry.date).getFullYear();
@@ -39,6 +41,43 @@ export const Details = ({ entry, onBack }: DetailsProps) => {
 
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeFailed, setIframeFailed] = useState(false);
+
+  // Load saved progress when component mounts or video changes
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleLoadedMetadata = () => {
+      const savedProgress = getWatchProgress(entry.id);
+      if (savedProgress > 0 && savedProgress < video.duration) {
+        video.currentTime = savedProgress;
+      }
+    };
+
+    video.addEventListener('loadedmetadata', handleLoadedMetadata);
+    return () => video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+  }, [entry.id]);
+
+  // Save progress periodically and on timeupdate
+  const lastSaveTimeRef = useRef<number>(0);
+  const handleTimeUpdate = useCallback(() => {
+    if (!videoRef.current) return;
+    const now = Date.now();
+    // Only save progress every 5 seconds to avoid excessive localStorage writes
+    if (now - lastSaveTimeRef.current > 5000) {
+      saveWatchProgress(entry.id, videoRef.current.currentTime);
+      lastSaveTimeRef.current = now;
+    }
+  }, [entry.id]);
+
+  // Save progress when leaving the component
+  useEffect(() => {
+    return () => {
+      if (videoRef.current) {
+        saveWatchProgress(entry.id, videoRef.current.currentTime);
+      }
+    };
+  }, [entry.id]);
 
   // Reset iframe state when episode changes
   useEffect(() => {
@@ -259,8 +298,10 @@ export const Details = ({ entry, onBack }: DetailsProps) => {
                 {isLocalVideo && !isGoogleDriveUrl ? (
                   // Local video player
                   <video
+                    ref={videoRef}
                     src={safeVideoUrl}
                     controls
+                    onTimeUpdate={handleTimeUpdate}
                     className="absolute inset-0 w-full h-full bg-black"
                   >
                     Your browser does not support the video tag.

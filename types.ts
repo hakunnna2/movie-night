@@ -29,6 +29,7 @@ export interface MovieEntry {
   episodes?: Episode[]; // Array of episodes for TV shows
   captures?: string[]; // Array of image URLs for the gallery
   videos?: VideoMedia[]; // Array of video movies/trailers (local files or embeds)
+  watchProgress?: number; // Seconds watched for resume feature
 }
 
 export type SortOption = 'date-desc' | 'date-asc' | 'rating-desc';
