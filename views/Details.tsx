@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Star, Plus, List, Image as ImageIcon, PlayCircle, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { useState, useEffect, useCallback, SyntheticEvent, MouseEvent } from 'react';
+import { ArrowLeft, Star, Download, X, ChevronLeft, ChevronRight, PlayCircle } from 'lucide-react';
 import { MovieEntry } from '../types';
 import { ImageWithSkeleton } from '../components/ImageWithSkeleton';
 import { useSwipe } from '../hooks/useSwipe';
@@ -10,40 +10,31 @@ interface DetailsProps {
   onBack: () => void;
 }
 
-export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
+export const Details = ({ entry, onBack }: DetailsProps) => {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [selectedEpisodeIndex, setSelectedEpisodeIndex] = useState<number>(0);
   const isTv = entry.type === 'tv';
   const isWatched = entry.status === 'watched';
   const year = new Date(entry.date).getFullYear();
 
-  const onImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+  const onImageError = (e: SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.currentTarget;
     target.onerror = null;
     target.src = 'https://via.placeholder.com/800x450?text=Image+Unavailable';
   };
 
-  // For TV shows, get video from selected episode; for movies, get first video
   const safeVideoUrl = isTv 
-    ? entry.videos && entry.videos[selectedEpisodeIndex] ? entry.videos[selectedEpisodeIndex].url : null
-    : entry.videos && entry.videos.length > 0 ? entry.videos[0].url : null;
+    ? entry.videos?.[selectedEpisodeIndex]?.url
+    : entry.videos?.[0]?.url;
   const isLocalVideo = isTv 
-    ? entry.videos && entry.videos[selectedEpisodeIndex] && entry.videos[selectedEpisodeIndex].type === 'local'
-    : entry.videos && entry.videos.length > 0 && entry.videos[0].type === 'local';
+    ? entry.videos?.[selectedEpisodeIndex]?.type === 'local'
+    : entry.videos?.[0]?.type === 'local';
   
-  // Check if URL is Google Drive
-  const isGoogleDriveUrl = safeVideoUrl && safeVideoUrl.includes('drive.google.com');
+  const isGoogleDriveUrl = safeVideoUrl?.includes('drive.google.com');
   
-  // Convert Google Drive URL to embed format if needed
   const getEmbedUrl = (url: string) => {
-    if (url.includes('drive.google.com')) {
-      const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
-      if (match && match[1]) {
-        // Use both preview and minimal UI for better embedding
-        return `https://drive.google.com/file/d/${match[1]}/preview`;
-      }
-    }
-    return url;
+    const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+    return match?.[1] ? `https://drive.google.com/file/d/${match[1]}/preview` : url;
   };
 
   const [iframeLoaded, setIframeLoaded] = useState(false);
@@ -55,24 +46,11 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
     setIframeFailed(false);
   }, [selectedEpisodeIndex, safeVideoUrl]);
 
-  // Get download URL for different video sources
-  const getDownloadUrl = (url: string) => {
-    if (url.includes('drive.google.com')) {
-      const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
-      if (match && match[1]) {
-        return `https://drive.google.com/uc?export=download&id=${match[1]}`;
-      }
-    }
-    return url;
-  };
-
   const handleDownload = () => {
     if (!safeVideoUrl) return;
-    // For Google Drive, open in new tab (can't force download)
     if (safeVideoUrl.includes('drive.google.com')) {
       window.open(safeVideoUrl, '_blank');
     } else {
-      // For other sources, try to download
       const a = document.createElement('a');
       a.href = safeVideoUrl;
       a.download = `${entry.title}.mp4`;
@@ -82,23 +60,21 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
     }
   };
 
-  // Show a helpful external link for YouTube if embed fails or as a quick fallback
   const getExternalVideoLink = (url?: string) => {
     if (!url) return null;
     try {
       const u = new URL(url, window.location.origin);
-      // Convert embed URL to watch URL when possible
       if (u.hostname.includes('youtube.com') && u.pathname.startsWith('/embed/')) {
         const id = u.pathname.split('/embed/')[1];
-        if (id) return `https://www.youtube.com/watch?v=${id}`;
+        return id ? `https://www.youtube.com/watch?v=${id}` : url;
       }
       return url;
-    } catch (e) {
+    } catch {
       return url;
     }
   };
 
-  const externalVideoLink = getExternalVideoLink(safeVideoUrl || undefined);
+  const externalVideoLink = getExternalVideoLink(safeVideoUrl);
 
   // Simple watchdog component inlined to avoid extra file.
   function IframeWatchdog({ setFailed, timeout = 4000 }: { setFailed: () => void; timeout?: number }) {
@@ -109,14 +85,14 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
     return null;
   }
 
-  const handleNext = useCallback((e?: React.MouseEvent) => {
+  const handleNext = useCallback((e?: MouseEvent) => {
     e?.stopPropagation();
     if (selectedPhotoIndex !== null && entry.captures) {
       setSelectedPhotoIndex((selectedPhotoIndex + 1) % entry.captures.length);
     }
   }, [selectedPhotoIndex, entry.captures]);
 
-  const handlePrev = useCallback((e?: React.MouseEvent) => {
+  const handlePrev = useCallback((e?: MouseEvent) => {
     e?.stopPropagation();
     if (selectedPhotoIndex !== null && entry.captures) {
       setSelectedPhotoIndex((selectedPhotoIndex - 1 + entry.captures.length) % entry.captures.length);
@@ -133,11 +109,6 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedPhotoIndex, handleNext, handlePrev]);
-
-  useEffect(() => {
-    const noop = () => {};
-    return noop;
-  }, []);
 
   // Add swipe gesture support for lightbox
   useSwipe(
@@ -177,7 +148,6 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
             <X size={36} />
           </button>
 
-          {/* Navigation Arrows */}
           {entry.captures && entry.captures.length > 1 && (
             <>
               <button

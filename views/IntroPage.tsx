@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { MovieEntry } from '../types';
 import { ArrowRight } from 'lucide-react';
 
@@ -7,8 +7,7 @@ interface IntroPageProps {
   onContinue: () => void;
 }
 
-export const IntroPage: React.FC<IntroPageProps> = ({ entries, onContinue }) => {
-  const [isAnimating] = useState(true);
+export const IntroPage = ({ entries, onContinue }: IntroPageProps) => {
 
   // Calculate time together
   const timeTogether = useMemo(() => {
@@ -58,20 +57,16 @@ export const IntroPage: React.FC<IntroPageProps> = ({ entries, onContinue }) => 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-night-900 via-purple-900/20 to-night-900 flex items-center justify-center p-4">
-      <div className={`max-w-3xl w-full transition-all duration-1000 ${isAnimating ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
-        {/* Animated avatars - Fusion */}
+      <div className="max-w-3xl w-full transition-all duration-1000 opacity-100 scale-100">
         <div className="flex justify-center items-center mb-4 relative">
-          <div className={`w-16 h-16 rounded-full bg-gradient-to-br from-popcorn to-yellow-400 flex items-center justify-center text-2xl font-bold text-night-900 shadow-lg shadow-popcorn/50 relative z-10 ${isAnimating ? 'avatar-A' : ''}`}>
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-popcorn to-yellow-400 flex items-center justify-center text-2xl font-bold text-night-900 shadow-lg shadow-popcorn/50 relative z-10 avatar-A">
             A
           </div>
-          <div className={`w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-purple-400/50 -ml-4 relative z-10 ${isAnimating ? 'avatar-N' : ''}`}>
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-purple-400/50 -ml-4 relative z-10 avatar-N">
             N
           </div>
-          {/* Fusion glow effect */}
           <div className="absolute w-8 h-8 bg-gradient-to-r from-popcorn/30 to-purple-400/30 blur-xl rounded-full"></div>
         </div>
-
-        {/* Header text */}
         <div className="text-center mb-6">
           <h2 className="text-xs md:text-sm font-light text-ink-300 uppercase tracking-[0.3em]">
             Our Private Cinema Journal

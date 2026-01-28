@@ -1,4 +1,3 @@
-import React from 'react';
 import { Eye, Calendar } from 'lucide-react';
 
 interface NavigationHeaderProps {

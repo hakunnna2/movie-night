@@ -1,31 +1,32 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { MovieEntry, FilterType, SortOption } from '../types';
 import { MovieCard } from '../components/MovieCard';
 import { FilterBar } from '../components/FilterBar';
-import { Sparkles, Ticket, Armchair, Search, X } from 'lucide-react';
+import { Search, X, Ticket, Film, Sparkles } from 'lucide-react';
 
 interface HomeProps {
   entries: MovieEntry[];
   onNavigate: (view: 'details', id?: string) => void;
 }
 
-export const Home: React.FC<HomeProps> = ({ entries, onNavigate }) => {
+export const Home = ({ entries, onNavigate }: HomeProps) => {
   const [filter, setFilter] = useState<FilterType>('all');
   const [sort, setSort] = useState<SortOption>('date-desc');
   const [search, setSearch] = useState<string>('');
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const processEntries = useCallback((status: 'watched' | 'upcoming') => {
+    const searchLower = search.toLowerCase();
     return entries
       .filter(e => e.status === status)
-      .filter(e => filter === 'all' ? true : e.type === filter)
-      .filter(e => 
-        search.trim() === '' || 
-        e.title.toLowerCase().includes(search.toLowerCase()) ||
-        e.originalTitle?.toLowerCase().includes(search.toLowerCase()) ||
-        e.genres?.some(g => g.toLowerCase().includes(search.toLowerCase())) ||
-        e.story?.toLowerCase().includes(search.toLowerCase())
-      )
+      .filter(e => filter === 'all' || e.type === filter)
+      .filter(e => {
+        if (!search.trim()) return true;
+        return e.title.toLowerCase().includes(searchLower) ||
+               e.originalTitle?.toLowerCase().includes(searchLower) ||
+               e.genres?.some(g => g.toLowerCase().includes(searchLower)) ||
+               e.story?.toLowerCase().includes(searchLower);
+      })
       .sort((a, b) => {
         if (sort === 'date-desc') return new Date(b.date).getTime() - new Date(a.date).getTime();
         if (sort === 'date-asc') return new Date(a.date).getTime() - new Date(b.date).getTime();
@@ -34,20 +35,19 @@ export const Home: React.FC<HomeProps> = ({ entries, onNavigate }) => {
       });
   }, [entries, filter, sort, search]);
 
-  const watchedList = useMemo(() => processEntries('watched'), [entries, filter, sort, search]);
-  const upcomingList = useMemo(() => processEntries('upcoming'), [entries, filter, sort, search]);
+  const watchedList = useMemo(() => processEntries('watched'), [processEntries]);
+  const upcomingList = useMemo(() => processEntries('upcoming'), [processEntries]);
 
-  // Get search suggestions
   const searchSuggestions = useMemo(() => {
-    if (search.trim() === '') return [];
-    const allMatches = entries
+    if (!search.trim()) return [];
+    const searchLower = search.toLowerCase();
+    return entries
       .filter(e => 
-        e.title.toLowerCase().includes(search.toLowerCase()) ||
-        e.originalTitle?.toLowerCase().includes(search.toLowerCase()) ||
-        e.genres?.some(g => g.toLowerCase().includes(search.toLowerCase()))
+        e.title.toLowerCase().includes(searchLower) ||
+        e.originalTitle?.toLowerCase().includes(searchLower) ||
+        e.genres?.some(g => g.toLowerCase().includes(searchLower))
       )
-      .slice(0, 8); // Limit to 8 suggestions
-    return allMatches;
+      .slice(0, 8);
   }, [entries, search]);
 
   // Calculate time together

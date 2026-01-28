@@ -1,4 +1,4 @@
-import React from 'react';
+import { Fragment } from 'react';
 import { ChevronRight, Home as HomeIcon } from 'lucide-react';
 
 export interface BreadcrumbItem {
@@ -12,7 +12,7 @@ interface BreadcrumbsProps {
   onHome?: () => void;
 }
 
-export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, onHome }) => {
+export const Breadcrumbs = ({ items, onHome }: BreadcrumbsProps) => {
   return (
     <nav className="flex items-center gap-2 text-sm" aria-label="Breadcrumb">
       <button
@@ -24,7 +24,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, onHome }) => {
       </button>
       
       {items.map((item, idx) => (
-        <React.Fragment key={idx}>
+        <Fragment key={idx}>
           <ChevronRight size={16} className="text-slate-400/50" />
           {item.onClick ? (
             <button
@@ -36,7 +36,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, onHome }) => {
           ) : (
             <span className="text-slate-400">{item.label}</span>
           )}
-        </React.Fragment>
+        </Fragment>
       ))}
     </nav>
   );

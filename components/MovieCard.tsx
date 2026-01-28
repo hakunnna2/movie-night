@@ -1,5 +1,5 @@
-import React, { useState, memo } from 'react';
-import { Film, Tv, Clock, Star } from 'lucide-react';
+import { useState, memo, KeyboardEvent } from 'react';
+import { Clock } from 'lucide-react';
 import { MovieEntry } from '../types';
 import { StarRating } from './StarRating';
 import { ImageWithSkeleton } from './ImageWithSkeleton';
@@ -9,20 +9,14 @@ interface MovieCardProps {
   onClick: () => void;
 }
 
-export const MovieCard: React.FC<MovieCardProps> = memo(({ entry, onClick }) => {
+export const MovieCard = memo(({ entry, onClick }: MovieCardProps) => {
   const isWatched = entry.status === 'watched';
   const [imgError, setImgError] = useState(false);
-  const [imgLoaded, setImgLoaded] = useState(false);
 
-  // Use 'story' as primary, fallback to 'reason'
   const displayText = entry.story || entry.reason;
-  
-  // Use first capture if available, otherwise fallback to poster
-  const captureImage = (entry.captures && entry.captures.length > 0) 
-    ? entry.captures[0] 
-    : entry.posterUrl;
+  const captureImage = entry.captures?.[0] || entry.posterUrl;
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       onClick();

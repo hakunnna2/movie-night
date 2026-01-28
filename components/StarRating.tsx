@@ -1,4 +1,3 @@
-import React from 'react';
 import { Star } from 'lucide-react';
 
 interface StarRatingProps {
@@ -9,13 +8,13 @@ interface StarRatingProps {
   size?: number;
 }
 
-export const StarRating: React.FC<StarRatingProps> = ({ 
+export const StarRating = ({ 
   rating, 
   max = 5, 
   interactive = false, 
   onRate,
   size = 18
-}) => {
+}: StarRatingProps) => {
   return (
     <div className="flex gap-1">
       {[...Array(max)].map((_, index) => {

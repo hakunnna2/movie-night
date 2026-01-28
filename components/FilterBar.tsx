@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { FilterType, SortOption } from '../types';
 
 interface FilterBarProps {
@@ -8,7 +8,7 @@ interface FilterBarProps {
   setSort: (s: SortOption) => void;
 }
 
-export const FilterBar: React.FC<FilterBarProps> = memo(({ filter, setFilter, sort, setSort }) => {
+export const FilterBar = memo(({ filter, setFilter, sort, setSort }: FilterBarProps) => {
   return (
     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8 bg-night-800/50 p-2 rounded-2xl border border-night-700/50">
       <div className="flex gap-1" role="group" aria-label="Filter movies and TV shows">

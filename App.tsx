@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { getEntriesAsync } from './services/storage';
 import { MovieEntry } from './types';
@@ -12,7 +12,7 @@ const Details = lazy(() => import('./views/Details').then(m => ({ default: m.Det
 const IntroPage = lazy(() => import('./views/IntroPage').then(m => ({ default: m.IntroPage })));
 
 // Loading fallback component for Suspense boundaries
-const LoadingFallback: React.FC = () => (
+const LoadingFallback = () => (
   <div className="min-h-screen bg-night-900 flex items-center justify-center">
     <div className="text-center">
       <div className="inline-block">
@@ -23,25 +23,21 @@ const LoadingFallback: React.FC = () => (
   </div>
 );
 
-const AppContent: React.FC = () => {
+const AppContent = () => {
   const [entries, setEntries] = useState<MovieEntry[]>([]);
   const [showIntro, setShowIntro] = useState(true);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Load data from JSON on mount
   useEffect(() => {
     const loadData = async () => {
       try {
         const data = await getEntriesAsync();
         setEntries(data);
-        // Skip intro if user is accessing a specific route directly
         if (location.pathname !== '/') {
           setShowIntro(false);
         }
-      } catch (error) {
-        console.error('Failed to load entries:', error);
       } finally {
         setLoading(false);
       }
@@ -50,14 +46,9 @@ const AppContent: React.FC = () => {
     loadData();
   }, [location.pathname]);
 
-  // Navigation handlers
   const navigateTo = (view: 'home' | 'details', id?: string) => {
-    if (view === 'details' && id) {
-      navigate(`/movie/${id}`);
-    } else {
-      navigate('/');
-    }
-    window.scrollTo(0, 0);
+    navigate(view === 'details' && id ? `/movie/${id}` : '/');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (loading) {
@@ -106,8 +97,7 @@ const AppContent: React.FC = () => {
   );
 };
 
-// Wrapper component to handle route params
-const MovieDetails: React.FC<{ entries: MovieEntry[]; onBack: () => void }> = ({ entries, onBack }) => {
+const MovieDetails = ({ entries, onBack }: { entries: MovieEntry[]; onBack: () => void }) => {
   const { id } = useParams<{ id: string }>();
   const entry = entries.find(e => e.id === id);
   
@@ -116,7 +106,7 @@ const MovieDetails: React.FC<{ entries: MovieEntry[]; onBack: () => void }> = ({
       <div className="min-h-screen bg-night-900 flex items-center justify-center">
         <div className="text-center">
           <p className="text-xl text-ink-300 mb-4">Movie not found</p>
-          <button onClick={onBack} className="px-4 py-2 bg-popcorn text-night-900 rounded-lg">
+          <button onClick={onBack} className="px-4 py-2 bg-popcorn text-night-900 rounded-lg hover:bg-popcorn/90 transition-colors">
             Go Back
           </button>
         </div>
@@ -124,26 +114,20 @@ const MovieDetails: React.FC<{ entries: MovieEntry[]; onBack: () => void }> = ({
     );
   }
 
-  return (
-    <div className="animate-fade-in">
-      <Details entry={entry} onBack={onBack} />
-    </div>
-  );
+  return <Details entry={entry} onBack={onBack} />;
 };
 
-const App: React.FC = () => {
-  return (
-    <ErrorBoundary>
-      <BrowserRouter>
-        <AppContextProvider>
-          <div className="min-h-screen bg-night-900 text-ink-100 font-sans selection:bg-popcorn selection:text-night-900">
-            <AppContent />
-            <ScrollToTopButton />
-          </div>
-        </AppContextProvider>
-      </BrowserRouter>
-    </ErrorBoundary>
-  );
-};
+const App = () => (
+  <ErrorBoundary>
+    <BrowserRouter>
+      <AppContextProvider>
+        <div className="min-h-screen bg-night-900 text-ink-100 font-sans selection:bg-popcorn selection:text-night-900">
+          <AppContent />
+          <ScrollToTopButton />
+        </div>
+      </AppContextProvider>
+    </BrowserRouter>
+  </ErrorBoundary>
+);
 
 export default App;

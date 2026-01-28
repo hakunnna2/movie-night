@@ -1,27 +1,20 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import { createContext, useState, useContext, ReactNode } from 'react';
 import { FilterType, SortOption } from '../types';
 
 interface AppContextType {
-  // Search & Filter state
   filter: FilterType;
   setFilter: (filter: FilterType) => void;
   sort: SortOption;
   setSort: (sort: SortOption) => void;
   search: string;
   setSearch: (search: string) => void;
-  
-  // Navigation state
   currentMovieId?: string;
   setCurrentMovieId: (id?: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-interface AppContextProviderProps {
-  children: ReactNode;
-}
-
-export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children }) => {
+export const AppContextProvider = ({ children }: { children: ReactNode }) => {
   const [filter, setFilter] = useState<FilterType>('all');
   const [sort, setSort] = useState<SortOption>('date-desc');
   const [search, setSearch] = useState<string>('');
