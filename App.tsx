@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import { getEntriesAsync } from './services/storage';
 import { MovieEntry } from './types';
@@ -25,7 +25,6 @@ const AppContent: React.FC = () => {
   const [entries, setEntries] = useState<MovieEntry[]>([]);
   const [showIntro, setShowIntro] = useState(true);
   const [loading, setLoading] = useState(true);
-  const isFirstLoadRef = useRef(true);
   const navigate = useNavigate();
 
   // Load data from JSON on mount
@@ -42,14 +41,6 @@ const AppContent: React.FC = () => {
     };
     
     loadData();
-    
-    // Hide intro after first load
-    const timer = setTimeout(() => {
-      if (isFirstLoadRef.current) {
-        isFirstLoadRef.current = false;
-      }
-    }, 100);
-    return () => clearTimeout(timer);
   }, []);
 
   // Navigation handlers
@@ -73,7 +64,7 @@ const AppContent: React.FC = () => {
   // Router Logic
   return (
     <Suspense fallback={<LoadingFallback />}>
-      {showIntro && isFirstLoadRef.current ? (
+      {showIntro ? (
         <div className="animate-fade-in">
           <IntroPage 
             entries={entries}
