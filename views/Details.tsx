@@ -359,7 +359,7 @@ export const Details: React.FC<DetailsProps> = ({ entry, onBack }) => {
 
             <div className="relative pl-6">
                <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#fbbf24]/30 rounded-full"></div>
-               <p className="text-2xl md:text-3xl leading-relaxed text-ink-100 font-hand italic opacity-90 mb-12">
+               <p className="text-lg md:text-xl leading-relaxed text-ink-100 font-hand italic opacity-90 mb-12">
                  "{entry.story || entry.reason}"
                </p>
             </div>
