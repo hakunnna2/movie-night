@@ -1,3 +1,9 @@
+# Don't redirect static assets
 /assets/* /assets/:splat 200
+# Don't redirect service worker and manifest
 /sw.js /sw.js 200
+/manifest.json /manifest.json 200
+# For SPA routing - only redirect HTML routes
+/movie/* /index.html 200
+/details/* /index.html 200
 /* /index.html 200
