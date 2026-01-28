@@ -24,8 +24,8 @@ export default {
         },
       },
       fontFamily: {
-        handwriting: ['Caveat', 'cursive'],
-        sans: ['Nunito', 'sans-serif'],
+        sans: ['Pacifico', 'cursive'],
+        story: ['Yellowtail', 'cursive'],
       },
     },
   },
