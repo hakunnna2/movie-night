@@ -215,6 +215,9 @@ const MOVIES_DATA: MovieEntry[] = [
     "posterUrl": "/assets/ABIM/abi.png",
     "captures": [
       "/assets/ABIM/abi.png"
+    ],
+    "videos": [
+      { "title": "Movie", "url": "https://drive.google.com/file/d/1QekFQX3NjXl5M0fhgTbOwZguDATeEwCz/view?usp=sharing", "type": "local" }
     ]
   },
   {
