@@ -257,7 +257,8 @@ const MOVIES_DATA: MovieEntry[] = [
     "id": "15",
     "title": "Brother Episode 5",
     "type": "tv",
-    "status": "upcoming",
+    "status": "watched",
+    "rating": 5,
     "date": "2026-02-11",
     "genres": ["Drama", "Family", "Psychological"],
     "duration": "2h 30m",
@@ -268,6 +269,23 @@ const MOVIES_DATA: MovieEntry[] = [
     ],
     "videos": [
       { "title": "Movie", "url": "https://drive.google.com/file/d/1ACOFv8X12EEtZUBDCa--q0dda15R0Idx/view?usp=sharing", "type": "local" }
+    ]
+  },
+  {
+    "id": "16",
+    "title": "Brother Episode 6",
+    "type": "tv",
+    "status": "upcoming",
+    "date": "2026-02-18",
+    "genres": ["Drama", "Family", "Psychological"],
+    "duration": "2h 30m",
+    "story": "The Turkish series Abi (My Brother) revolves around the idea that family is a true test. It follows the story of Çağla, a lawyer who was pushed into her profession by the harshness of life and the absence of a real family. On the other side stands Doğan, a man from a large and wealthy family who ran away in an attempt to escape a past filled with secrets. But life forces a confrontation, and the doors to a deep relationship open, where each of them carries postponed wounds—wounds they can neither open nor close… wounds called family.",
+    "posterUrl": "/assets/ABIM/abi.png",
+    "captures": [
+      "/assets/ABIM/abi.png"
+    ],
+    "videos": [
+      { "title": "Movie", "url": "", "type": "local" }
     ]
   },
 ];
