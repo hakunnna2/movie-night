@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { MovieEntry } from '../types';
 import { Calendar } from 'lucide-react';
 
