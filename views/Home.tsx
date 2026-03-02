@@ -20,9 +20,6 @@ export const Home = ({ entries, onNavigate, selectedUser }: HomeProps) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [lastEntriesLength, setLastEntriesLength] = useState(entries.length);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [lastEntriesLength, setLastEntriesLength] = useState(entries.length);
 
   // Add notification
   const addNotification = useCallback((notification: Omit<Notification, 'id'>) => {
@@ -59,28 +56,6 @@ export const Home = ({ entries, onNavigate, selectedUser }: HomeProps) => {
       setLastEntriesLength(entries.length);
     }
   }, [entries, lastEntriesLength, addNotification]);
-
-  // Check for new comments on existing entries
-  useEffect(() => {
-    entries.forEach(entry => {
-      if (entry.comments && entry.comments.length > 0) {
-        const latestComment = entry.comments[entry.comments.length - 1];
-        const commentDate = new Date(latestComment.date);
-        const now = new Date();
-        const secondsAgo = (now.getTime() - commentDate.getTime()) / 1000;
-        
-        // Only show notification if comment is very recent (less than 1 second ago)
-        if (secondsAgo < 1) {
-          addNotification({
-            type: 'comment-added',
-            title: `New Comment by ${latestComment.user === 'jojo' ? 'JoJo' : 'DoDo'}`,
-            message: `Comment added to "${entry.title}"`,
-            duration: 5000,
-          });
-        }
-      }
-    });
-  }, [entries, addNotification]);
 
   const processEntries = useCallback((status: 'watched' | 'upcoming') => {
     const searchLower = search.toLowerCase();

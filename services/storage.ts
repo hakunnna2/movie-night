@@ -282,11 +282,33 @@ const MOVIES_DATA: MovieEntry[] = [
   }
 ];
 
+const ENTRIES_STORAGE_KEY = 'movie-night-entries';
 const PROGRESS_STORAGE_KEY = 'movie-night-progress';
 let firebaseHydrated = false;
 
+const getEntriesFromStorage = (): MovieEntry[] | null => {
+  try {
+    const data = localStorage.getItem(ENTRIES_STORAGE_KEY);
+    if (!data) return null;
+    const parsed = JSON.parse(data);
+    return Array.isArray(parsed) ? parsed as MovieEntry[] : null;
+  } catch (error) {
+    console.error('Failed to parse stored entries:', error);
+    return null;
+  }
+};
+
+const saveEntriesToStorage = (entries: MovieEntry[]): void => {
+  try {
+    localStorage.setItem(ENTRIES_STORAGE_KEY, JSON.stringify(entries));
+  } catch (error) {
+    console.error('Failed to save entries locally:', error);
+  }
+};
+
 export const getEntries = (): MovieEntry[] => {
-  const entries = [...MOVIES_DATA];
+  const storedEntries = getEntriesFromStorage();
+  const entries = storedEntries && storedEntries.length > 0 ? [...storedEntries] : [...MOVIES_DATA];
   const progress = getProgressFromStorage();
   const ratings = getRatingsFromStorage();
   
@@ -317,16 +339,12 @@ export const getEntries = (): MovieEntry[] => {
 
 export const getEntriesAsync = async (): Promise<MovieEntry[]> => {
   await hydrateLocalStorageFromFirebase();
-  
-  // Try to load entries from Firebase first
-  const firebaseEntries = await loadMovieEntries();
-  
-  if (firebaseEntries && firebaseEntries.length > 0) {
-    // Use Firebase data
+
+  const mergeProgressAndRatings = (entries: MovieEntry[]) => {
     const progress = getProgressFromStorage();
     const ratings = getRatingsFromStorage();
-    
-    return firebaseEntries.map(entry => {
+
+    return entries.map(entry => {
       const storedRating = ratings[entry.id];
       const normalizedStoredRating = storedRating
         ? {
@@ -348,22 +366,40 @@ export const getEntriesAsync = async (): Promise<MovieEntry[]> => {
         ratings: normalizedStoredRating || normalizedEntryRating
       };
     });
+  };
+
+  // Try to load entries from Firebase first
+  const firebaseEntries = await loadMovieEntries();
+
+  if (firebaseEntries && firebaseEntries.length > 0) {
+    saveEntriesToStorage(firebaseEntries);
+    return mergeProgressAndRatings(firebaseEntries);
+  }
+
+  const storedEntries = getEntriesFromStorage();
+  if (storedEntries && storedEntries.length > 0) {
+    return mergeProgressAndRatings(storedEntries);
   }
   
   // If no Firebase data, migrate hardcoded data to Firebase (one-time)
   if (MOVIES_DATA.length > 0) {
-    await saveMovieEntries(MOVIES_DATA);
+    saveEntriesToStorage(MOVIES_DATA);
+    try {
+      await saveMovieEntries(MOVIES_DATA);
+    } catch (error) {
+      console.warn('Firebase seed failed, continuing with local entries:', error);
+    }
   }
   
   return getEntries();
 };
 
 export const saveEntries = async (entries: MovieEntry[]): Promise<void> => {
+  saveEntriesToStorage(entries);
   try {
     await saveMovieEntries(entries);
   } catch (error) {
-    console.error('Failed to save entries to Firebase:', error);
-    throw error;
+    console.warn('Failed to save entries to Firebase, kept local copy:', error);
   }
 };
 
@@ -481,7 +517,7 @@ const hydrateLocalStorageFromFirebase = async (): Promise<void> => {
           },
         ])
       );
-      const mergedRatings = { ...cloudRatings, ...localNormalized };
+      const mergedRatings = { ...localNormalized, ...cloudRatings };
       localStorage.setItem(RATING_STORAGE_KEY, JSON.stringify(mergedRatings));
     }
 

@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback, SyntheticEvent, MouseEvent, useRef, KeyboardEvent as ReactKeyboardEvent } from 'react';
-import { ArrowLeft, Star, Download, X, ChevronLeft, ChevronRight, PlayCircle, SendHorizonal } from 'lucide-react';
+import { useState, useEffect, useCallback, SyntheticEvent, MouseEvent, useRef } from 'react';
+import { ArrowLeft, Star, Download, X, ChevronLeft, ChevronRight, PlayCircle } from 'lucide-react';
 import { MovieEntry } from '../types';
 import { ImageWithSkeleton } from '../components/ImageWithSkeleton';
 import { useSwipe } from '../hooks/useSwipe';
 import { Breadcrumbs } from '../components/Breadcrumbs';
-import { saveWatchProgress, getWatchProgress, saveRating, getRating, saveEpisodeProgress, getResumeEpisodeIndex, saveEpisodeRating, getEpisodeRating, saveEpisodeStatus, getEpisodeStatus, initializeEpisodeStatuses, saveComment, getCommentThread } from '../services/storage';
+import { saveWatchProgress, getWatchProgress, saveRating, getRating, saveEpisodeProgress, getResumeEpisodeIndex, saveEpisodeRating, getEpisodeRating, saveEpisodeStatus, getEpisodeStatus, initializeEpisodeStatuses } from '../services/storage';
 
 interface DetailsProps {
   entry: MovieEntry;
@@ -28,9 +28,6 @@ export const Details = ({ entry, onBack, selectedUser, onRatingUpdate }: Details
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [tempJojoRating, setTempJojoRating] = useState(0);
   const [tempDodoRating, setTempDodoRating] = useState(0);
-  const [commentInput, setCommentInput] = useState('');
-  const [commentSaved, setCommentSaved] = useState(false);
-  const [commentThread, setCommentThread] = useState<ReturnType<typeof getCommentThread>>([]);
   
   // Track current ratings (from storage, not static entry)
   const [currentRatings, setCurrentRatings] = useState<{ jojo: number; dodo: number }>({
@@ -55,6 +52,29 @@ export const Details = ({ entry, onBack, selectedUser, onRatingUpdate }: Details
     if (storedRatings) {
       setCurrentRatings(storedRatings);
     }
+  }, [entry.id]);
+
+  useEffect(() => {
+    const syncRatingsFromStorage = () => {
+      const latestRatings = getRating(entry.id);
+      if (latestRatings) {
+        setCurrentRatings(latestRatings);
+      }
+    };
+
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'movie-night-ratings') {
+        syncRatingsFromStorage();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    const intervalId = window.setInterval(syncRatingsFromStorage, 1000);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.clearInterval(intervalId);
+    };
   }, [entry.id]);
 
   // Load episode ratings on mount
@@ -86,13 +106,6 @@ export const Details = ({ entry, onBack, selectedUser, onRatingUpdate }: Details
 
     setSelectedEpisodeIndex(clampedIndex);
   }, [entry.id, entry.episodes, isTv, selectedUser]);
-
-  // Load saved comment for this entry (and selected user, if any)
-  useEffect(() => {
-    setCommentThread(getCommentThread(entry.id, selectedUser));
-    setCommentInput('');
-    setCommentSaved(false);
-  }, [entry.id, selectedUser]);
 
   // Update temp ratings when modal opens
   useEffect(() => {
@@ -273,22 +286,6 @@ export const Details = ({ entry, onBack, selectedUser, onRatingUpdate }: Details
     }
   };
 
-  const handleSaveComment = () => {
-    saveComment(entry.id, commentInput, selectedUser);
-    setCommentThread(getCommentThread(entry.id, selectedUser));
-    setCommentInput('');
-    setCommentSaved(true);
-  };
-
-  const canSendComment = commentInput.trim().length > 0;
-
-  const handleCommentKeyDown = (e: ReactKeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && canSendComment) {
-      e.preventDefault();
-      handleSaveComment();
-    }
-  };
-
   // Simple watchdog component inlined to avoid extra file.
   function IframeWatchdog({ setFailed, timeout = 4000 }: { setFailed: () => void; timeout?: number }) {
     useEffect(() => {
@@ -417,50 +414,60 @@ export const Details = ({ entry, onBack, selectedUser, onRatingUpdate }: Details
               </button>
             </div>
 
-            {/* Rating Section - Only show for current user */}
-            {selectedUser === 'jojo' && (
-              <div className="mb-8">
-                <label className="text-[#fbbf24] font-bold text-sm mb-3 block">JoJo's Rating</label>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={`jojo-${star}`}
-                      onClick={() => setTempJojoRating(star)}
-                      className="transition-transform hover:scale-110"
-                      aria-label={`Rate ${star} stars`}
-                    >
-                      <Star
-                        size={32}
-                        className={star <= tempJojoRating ? "fill-[#fbbf24] text-[#fbbf24]" : "text-[#fbbf24]/30"}
-                      />
-                    </button>
-                  ))}
-                </div>
-                {tempJojoRating > 0 && <span className="text-[#fbbf24] text-sm mt-2 block">{tempJojoRating}/5</span>}
+            {/* Rating Section - Show both users' ratings */}
+            {/* JoJo's Rating */}
+            <div className="mb-6">
+              <label className="text-[#fbbf24] font-bold text-sm mb-3 block flex items-center gap-2">
+                JoJo's Rating
+                {selectedUser !== 'jojo' && <span className="text-xs text-white/50">(View Only)</span>}
+              </label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={`jojo-${star}`}
+                    onClick={() => selectedUser === 'jojo' && setTempJojoRating(star)}
+                    disabled={selectedUser !== 'jojo'}
+                    className={`transition-transform ${
+                      selectedUser === 'jojo' ? 'hover:scale-110 cursor-pointer' : 'cursor-not-allowed opacity-70'
+                    }`}
+                    aria-label={`Rate ${star} stars`}
+                  >
+                    <Star
+                      size={32}
+                      className={star <= tempJojoRating ? "fill-[#fbbf24] text-[#fbbf24]" : "text-[#fbbf24]/30"}
+                    />
+                  </button>
+                ))}
               </div>
-            )}
+              {tempJojoRating > 0 && <span className="text-[#fbbf24] text-sm mt-2 block">{tempJojoRating}/5</span>}
+            </div>
 
-            {selectedUser === 'dodo' && (
-              <div className="mb-8">
-                <label className="text-[#c084fc] font-bold text-sm mb-3 block">DoDo's Rating</label>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={`dodo-${star}`}
-                      onClick={() => setTempDodoRating(star)}
-                      className="transition-transform hover:scale-110"
-                      aria-label={`Rate ${star} stars`}
-                    >
-                      <Star
-                        size={32}
-                        className={star <= tempDodoRating ? "fill-[#c084fc] text-[#c084fc]" : "text-[#c084fc]/30"}
-                      />
-                    </button>
-                  ))}
-                </div>
-                {tempDodoRating > 0 && <span className="text-[#c084fc] text-sm mt-2 block">{tempDodoRating}/5</span>}
+            {/* DoDo's Rating */}
+            <div className="mb-8">
+              <label className="text-[#c084fc] font-bold text-sm mb-3 block flex items-center gap-2">
+                DoDo's Rating
+                {selectedUser !== 'dodo' && <span className="text-xs text-white/50">(View Only)</span>}
+              </label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={`dodo-${star}`}
+                    onClick={() => selectedUser === 'dodo' && setTempDodoRating(star)}
+                    disabled={selectedUser !== 'dodo'}
+                    className={`transition-transform ${
+                      selectedUser === 'dodo' ? 'hover:scale-110 cursor-pointer' : 'cursor-not-allowed opacity-70'
+                    }`}
+                    aria-label={`Rate ${star} stars`}
+                  >
+                    <Star
+                      size={32}
+                      className={star <= tempDodoRating ? "fill-[#c084fc] text-[#c084fc]" : "text-[#c084fc]/30"}
+                    />
+                  </button>
+                ))}
               </div>
-            )}
+              {tempDodoRating > 0 && <span className="text-[#c084fc] text-sm mt-2 block">{tempDodoRating}/5</span>}
+            </div>
 
             {/* Action Buttons */}
             <div className="flex gap-3">
@@ -521,14 +528,13 @@ export const Details = ({ entry, onBack, selectedUser, onRatingUpdate }: Details
               <div className="flex gap-2">
                 {/* JoJo Rating */}
                 <button
-                  onClick={() => selectedUser === 'jojo' && setShowRatingModal(true)}
-                  disabled={selectedUser !== 'jojo'}
+                  onClick={() => setShowRatingModal(true)}
                   className={`flex items-center gap-1.5 bg-[#fbbf24]/15 px-3 py-2 rounded-full transition-all ${
                     selectedUser === 'jojo'
                       ? 'hover:bg-[#fbbf24]/25 cursor-pointer'
-                      : 'opacity-60 cursor-not-allowed'
+                      : 'opacity-80 cursor-pointer hover:opacity-100'
                   }`}
-                  aria-label={selectedUser === 'jojo' ? "Edit JoJo's rating" : "JoJo's rating"}
+                  aria-label={selectedUser === 'jojo' ? "Edit JoJo's rating" : "View JoJo's rating"}
                 >
                   <span className="text-[10px] font-bold text-[#fbbf24]/80">JoJo</span>
                   <span className="text-lg font-black text-[#fbbf24]">{currentRatings.jojo}</span>
@@ -537,14 +543,13 @@ export const Details = ({ entry, onBack, selectedUser, onRatingUpdate }: Details
 
                 {/* DoDo Rating */}
                 <button
-                  onClick={() => selectedUser === 'dodo' && setShowRatingModal(true)}
-                  disabled={selectedUser !== 'dodo'}
+                  onClick={() => setShowRatingModal(true)}
                   className={`flex items-center gap-1.5 bg-[#c084fc]/15 px-3 py-2 rounded-full transition-all ${
                     selectedUser === 'dodo'
                       ? 'hover:bg-[#c084fc]/25 cursor-pointer'
-                      : 'opacity-60 cursor-not-allowed'
+                      : 'opacity-80 cursor-pointer hover:opacity-100'
                   }`}
-                  aria-label={selectedUser === 'dodo' ? "Edit DoDo's rating" : "DoDo's rating"}
+                  aria-label={selectedUser === 'dodo' ? "Edit DoDo's rating" : "View DoDo's rating"}
                 >
                   <span className="text-[10px] font-bold text-[#c084fc]/80">DoDo</span>
                   <span className="text-lg font-black text-[#c084fc]">{currentRatings.dodo}</span>
@@ -681,87 +686,6 @@ export const Details = ({ entry, onBack, selectedUser, onRatingUpdate }: Details
                  "{entry.story || entry.reason}"
                </p>
             </div>
-
-            {/* Comment Section */}
-            <section className="mb-12">
-              <h2 className="text-2xl font-black text-white mb-4 flex items-center gap-4 border-l-4 border-[#fbbf24] pl-4 uppercase tracking-tight">
-                Chat
-              </h2>
-              <div className="bg-black/50 border border-white/10 rounded-2xl p-3 md:p-4">
-                <div className="mb-3 max-h-80 overflow-y-auto space-y-2.5 pr-1">
-                  {commentThread.length > 0 ? (
-                    commentThread.map((message) => {
-                      const isMine = selectedUser ? message.sender === selectedUser : message.sender !== 'shared';
-                      const senderInitial = message.sender === 'jojo' ? 'J' : message.sender === 'dodo' ? 'D' : '•';
-
-                      return (
-                        <div key={message.id} className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
-                          {!isMine && (
-                            <div className="w-7 h-7 rounded-full bg-white/25 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
-                              {senderInitial}
-                            </div>
-                          )}
-
-                          <div className={`max-w-[82%] px-4 py-2 rounded-[22px] ${
-                            isMine
-                              ? 'bg-gradient-to-r from-popcorn to-pink-400 text-night-900 rounded-br-md'
-                              : 'bg-white/15 text-white rounded-bl-md'
-                          }`}>
-                            <p className="text-sm leading-relaxed break-words">{message.text}</p>
-                            <div className={`text-[10px] mt-1 ${isMine ? 'text-night-900/60' : 'text-white/50'}`}>
-                              {new Date(message.createdAt).toLocaleString(undefined, {
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </div>
-                          </div>
-
-                          {isMine && (
-                            <div className="w-7 h-7 rounded-full bg-white/25 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
-                              {senderInitial}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div className="text-sm text-white/60 bg-white/5 border border-white/10 rounded-xl px-3 py-3">
-                      No messages yet. Start the conversation.
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-2 flex items-center gap-2">
-                  <div className="flex-1 flex items-center bg-white/15 rounded-full px-3 py-1.5 border border-white/10">
-                    <input
-                      value={commentInput}
-                      onChange={(e) => {
-                        setCommentInput(e.target.value);
-                        if (commentSaved) setCommentSaved(false);
-                      }}
-                      onKeyDown={handleCommentKeyDown}
-                      placeholder={selectedUser ? `Aa (${selectedUser === 'jojo' ? 'JoJo' : 'DoDo'})` : 'Aa'}
-                      className="w-full bg-transparent text-ink-100 placeholder:text-white/50 focus:outline-none text-sm"
-                    />
-                  </div>
-
-                  <button
-                    onClick={handleSaveComment}
-                    disabled={!canSendComment}
-                    className={`w-9 h-9 rounded-full transition-all flex items-center justify-center ${
-                      canSendComment
-                        ? 'bg-gradient-to-r from-popcorn to-pink-400 text-night-900 hover:shadow-lg hover:shadow-popcorn/40'
-                        : 'bg-white/10 text-white/40 cursor-not-allowed'
-                    }`}
-                    aria-label="Send message"
-                  >
-                    <SendHorizonal size={16} />
-                  </button>
-                </div>
-              </div>
-            </section>
 
             <div className="h-[1px] bg-gradient-to-r from-white/10 to-transparent w-full mb-12"></div>
 

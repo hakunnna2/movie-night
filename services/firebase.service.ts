@@ -65,6 +65,8 @@ const getDeviceId = (): string => {
 
 const deviceId = getDeviceId();
 const userProgressRef = ref(database, `users/${deviceId}`);
+const sharedMovieEntriesRef = ref(database, 'shared/movieEntries');
+const sharedRatingsRef = ref(database, 'shared/ratings');
 
 // Save user progress to Firebase
 export const saveUserProgress = async (progress: UserProgress): Promise<void> => {
@@ -80,10 +82,34 @@ export const saveUserProgress = async (progress: UserProgress): Promise<void> =>
 export const loadUserProgress = async (): Promise<UserProgress | null> => {
   try {
     const snapshot = await get(userProgressRef);
-    if (snapshot.exists()) {
-      return snapshot.val() as UserProgress;
+    const baseProgress = snapshot.exists() ? (snapshot.val() as UserProgress) : {};
+
+    // Ratings are shared across all users/devices.
+    const sharedRatingsSnapshot = await get(sharedRatingsRef);
+    if (sharedRatingsSnapshot.exists()) {
+      return {
+        ...baseProgress,
+        ratings: sharedRatingsSnapshot.val() as UserProgress['ratings'],
+      };
     }
-    return null;
+
+    // Fallback/migration from older per-device ratings path.
+    const legacyRatingsRef = ref(database, `users/${deviceId}/ratings`);
+    const legacyRatingsSnapshot = await get(legacyRatingsRef);
+    if (legacyRatingsSnapshot.exists()) {
+      const legacyRatings = legacyRatingsSnapshot.val() as UserProgress['ratings'];
+      try {
+        await set(sharedRatingsRef, legacyRatings);
+      } catch (migrationError) {
+        console.warn('Failed to migrate legacy ratings to shared path:', migrationError);
+      }
+      return {
+        ...baseProgress,
+        ratings: legacyRatings,
+      };
+    }
+
+    return Object.keys(baseProgress).length > 0 ? baseProgress : null;
   } catch (error) {
     console.error('Error loading progress from Firebase:', error);
     return null;
@@ -93,7 +119,7 @@ export const loadUserProgress = async (): Promise<UserProgress | null> => {
 // Update specific rating (JoJo or DoDo)
 export const updateRating = async (movieId: string, person: 'jojo' | 'dodo', rating: number): Promise<void> => {
   try {
-    const ratingRef = ref(database, `users/${deviceId}/ratings/${movieId}/${person}`);
+    const ratingRef = ref(database, `shared/ratings/${movieId}/${person}`);
     await set(ratingRef, rating);
   } catch (error) {
     // Firebase database might not be enabled, but continue gracefully
@@ -174,8 +200,7 @@ export const updateComment = async (movieId: string, scope: 'shared' | 'jojo' | 
 // Save movie entries to Firebase
 export const saveMovieEntries = async (entries: MovieEntry[]): Promise<void> => {
   try {
-    const entriesRef = ref(database, `users/${deviceId}/movieEntries`);
-    await set(entriesRef, entries);
+    await set(sharedMovieEntriesRef, entries);
   } catch (error) {
     console.warn('Error saving movie entries to Firebase:', error);
     throw error;
@@ -185,11 +210,24 @@ export const saveMovieEntries = async (entries: MovieEntry[]): Promise<void> => 
 // Load movie entries from Firebase
 export const loadMovieEntries = async (): Promise<MovieEntry[] | null> => {
   try {
-    const entriesRef = ref(database, `users/${deviceId}/movieEntries`);
-    const snapshot = await get(entriesRef);
+    const snapshot = await get(sharedMovieEntriesRef);
     if (snapshot.exists()) {
       return snapshot.val() as MovieEntry[];
     }
+
+    // Fallback for older data that was saved per-device before shared entries existed.
+    const legacyEntriesRef = ref(database, `users/${deviceId}/movieEntries`);
+    const legacySnapshot = await get(legacyEntriesRef);
+    if (legacySnapshot.exists()) {
+      const legacyEntries = legacySnapshot.val() as MovieEntry[];
+      try {
+        await set(sharedMovieEntriesRef, legacyEntries);
+      } catch (migrationError) {
+        console.warn('Failed to migrate legacy movie entries to shared path:', migrationError);
+      }
+      return legacyEntries;
+    }
+
     return null;
   } catch (error) {
     console.warn('Error loading movie entries from Firebase:', error);
