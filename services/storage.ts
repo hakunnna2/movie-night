@@ -1,5 +1,5 @@
  import { MovieEntry } from '../types';
-import { CommentMessage, loadUserProgress, updateWatchProgress as firebaseUpdateProgress, updateRating as firebaseUpdateRating, updateEpisodeProgress as firebaseUpdateEpisodeProgress, updateEpisodeRating as firebaseUpdateEpisodeRating, updateEpisodeStatus as firebaseUpdateEpisodeStatus, updateComment as firebaseUpdateComment, saveMovieEntries, loadMovieEntries } from './firebase.service';
+import { CommentMessage, loadUserProgress, updateWatchProgress as firebaseUpdateProgress, updateRating as firebaseUpdateRating, updateEpisodeProgress as firebaseUpdateEpisodeProgress, updateEpisodeRating as firebaseUpdateEpisodeRating, updateEpisodeStatus as firebaseUpdateEpisodeStatus, updateComment as firebaseUpdateComment, saveMovieEntries, loadMovieEntries, subscribeSharedRating as firebaseSubscribeSharedRating } from './firebase.service';
 
 const MOVIES_DATA: MovieEntry[] = [
   {
@@ -620,6 +620,23 @@ export const getRating = (entryId: string): { jojo: number; dodo: number } | nul
     console.error('Failed to get rating:', error);
     return null;
   }
+};
+
+export const subscribeRatingRealtime = (
+  entryId: string,
+  onUpdate: (rating: { jojo: number; dodo: number }) => void
+): (() => void) => {
+  return firebaseSubscribeSharedRating(entryId, (rating) => {
+    try {
+      const ratings = getRatingsFromStorage();
+      ratings[entryId] = rating;
+      localStorage.setItem(RATING_STORAGE_KEY, JSON.stringify(ratings));
+    } catch (error) {
+      console.warn('Failed to sync realtime rating to local storage:', error);
+    }
+
+    onUpdate(rating);
+  });
 };
 
 const getRatingsFromStorage = (): Record<string, { jojo: number; dodo: number }> => {

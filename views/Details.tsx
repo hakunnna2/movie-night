@@ -4,7 +4,7 @@ import { MovieEntry } from '../types';
 import { ImageWithSkeleton } from '../components/ImageWithSkeleton';
 import { useSwipe } from '../hooks/useSwipe';
 import { Breadcrumbs } from '../components/Breadcrumbs';
-import { saveWatchProgress, getWatchProgress, saveRating, getRating, saveEpisodeProgress, getResumeEpisodeIndex, saveEpisodeRating, getEpisodeRating, saveEpisodeStatus, getEpisodeStatus, initializeEpisodeStatuses } from '../services/storage';
+import { saveWatchProgress, getWatchProgress, saveRating, getRating, saveEpisodeProgress, getResumeEpisodeIndex, saveEpisodeRating, getEpisodeRating, saveEpisodeStatus, getEpisodeStatus, initializeEpisodeStatuses, subscribeRatingRealtime } from '../services/storage';
 
 interface DetailsProps {
   entry: MovieEntry;
@@ -55,25 +55,12 @@ export const Details = ({ entry, onBack, selectedUser, onRatingUpdate }: Details
   }, [entry.id]);
 
   useEffect(() => {
-    const syncRatingsFromStorage = () => {
-      const latestRatings = getRating(entry.id);
-      if (latestRatings) {
-        setCurrentRatings(latestRatings);
-      }
-    };
-
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'movie-night-ratings') {
-        syncRatingsFromStorage();
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    const intervalId = window.setInterval(syncRatingsFromStorage, 1000);
+    const unsubscribe = subscribeRatingRealtime(entry.id, (latestRatings) => {
+      setCurrentRatings(latestRatings);
+    });
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.clearInterval(intervalId);
+      unsubscribe();
     };
   }, [entry.id]);
 

@@ -1,5 +1,5 @@
 import { database } from './firebase.config';
-import { ref, set, get, update } from 'firebase/database';
+import { ref, set, get, update, onValue } from 'firebase/database';
 import { MovieEntry } from '../types';
 
 export interface CommentMessage {
@@ -129,6 +129,33 @@ export const updateRating = async (movieId: string, person: 'jojo' | 'dodo', rat
       console.warn('Error updating rating:', error);
     }
     // Don't throw - let the app continue even if Firebase fails
+  }
+};
+
+export const subscribeSharedRating = (
+  movieId: string,
+  onUpdate: (rating: { jojo: number; dodo: number }) => void
+): (() => void) => {
+  try {
+    const ratingRef = ref(database, `shared/ratings/${movieId}`);
+    const unsubscribe = onValue(
+      ratingRef,
+      (snapshot) => {
+        const value = snapshot.val() as { jojo?: number; dodo?: number } | null;
+        onUpdate({
+          jojo: typeof value?.jojo === 'number' ? value.jojo : 0,
+          dodo: typeof value?.dodo === 'number' ? value.dodo : 0,
+        });
+      },
+      (error) => {
+        console.warn('Realtime rating subscription failed:', error);
+      }
+    );
+
+    return unsubscribe;
+  } catch (error) {
+    console.warn('Failed to start realtime rating subscription:', error);
+    return () => {};
   }
 };
 
