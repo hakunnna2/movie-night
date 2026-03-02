@@ -5,11 +5,14 @@ import { MovieEntry } from './types';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ScrollToTopButton } from './components/ScrollToTopButton';
 import { AppContextProvider } from './context/AppContext';
+import { ProtectedAdmin } from './components/ProtectedAdmin';
 
 // Lazy load views for code splitting
 const Home = lazy(() => import('./views/Home').then(m => ({ default: m.Home })));
 const Details = lazy(() => import('./views/Details').then(m => ({ default: m.Details })));
 const IntroPage = lazy(() => import('./views/IntroPage').then(m => ({ default: m.IntroPage })));
+const Admin = lazy(() => import('./views/Admin').then(m => ({ default: m.Admin })));
+const SELECTED_USER_KEY = 'movie-night-selected-user';
 
 // Loading fallback component for Suspense boundaries
 const LoadingFallback = () => (
@@ -27,8 +30,28 @@ const AppContent = () => {
   const [entries, setEntries] = useState<MovieEntry[]>([]);
   const [showIntro, setShowIntro] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<'jojo' | 'dodo' | null>(() => {
+    try {
+      const storedUser = localStorage.getItem(SELECTED_USER_KEY);
+      return storedUser === 'jojo' || storedUser === 'dodo' ? storedUser : null;
+    } catch {
+      return null;
+    }
+  });
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    try {
+      if (selectedUser) {
+        localStorage.setItem(SELECTED_USER_KEY, selectedUser);
+      } else {
+        localStorage.removeItem(SELECTED_USER_KEY);
+      }
+    } catch {
+      // ignore localStorage failures
+    }
+  }, [selectedUser]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -45,6 +68,11 @@ const AppContent = () => {
     
     loadData();
   }, [location.pathname]);
+
+  const reloadEntries = async () => {
+    const data = await getEntriesAsync();
+    setEntries(data);
+  };
 
   const navigateTo = (view: 'home' | 'details', id?: string) => {
     navigate(view === 'details' && id ? `/movie/${id}` : '/');
@@ -67,6 +95,8 @@ const AppContent = () => {
           <IntroPage 
             entries={entries}
             onContinue={() => setShowIntro(false)}
+            selectedUser={selectedUser}
+            onSelectUser={setSelectedUser}
           />
         </div>
       ) : (
@@ -75,19 +105,29 @@ const AppContent = () => {
             path="/" 
             element={
               <div className="animate-fade-in">
-                <Home entries={entries} onNavigate={navigateTo} />
+                <Home entries={entries} onNavigate={navigateTo} selectedUser={selectedUser} />
               </div>
             } 
           />
           <Route 
             path="/movie/:id" 
-            element={<MovieDetails entries={entries} onBack={() => navigateTo('home')} />} 
+            element={<MovieDetails entries={entries} onBack={() => navigateTo('home')} selectedUser={selectedUser} reloadEntries={reloadEntries} />} 
+          />
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedAdmin>
+                <div className="animate-fade-in">
+                  <Admin entries={entries} onBack={() => navigateTo('home')} onEntriesUpdate={reloadEntries} />
+                </div>
+              </ProtectedAdmin>
+            } 
           />
           <Route 
             path="*" 
             element={
               <div className="animate-fade-in">
-                <Home entries={entries} onNavigate={navigateTo} />
+                <Home entries={entries} onNavigate={navigateTo} selectedUser={selectedUser} />
               </div>
             } 
           />
@@ -97,7 +137,7 @@ const AppContent = () => {
   );
 };
 
-const MovieDetails = ({ entries, onBack }: { entries: MovieEntry[]; onBack: () => void }) => {
+const MovieDetails = ({ entries, onBack, selectedUser, reloadEntries }: { entries: MovieEntry[]; onBack: () => void; selectedUser?: 'jojo' | 'dodo' | null; reloadEntries: () => Promise<void> }) => {
   const { id } = useParams<{ id: string }>();
   const entry = entries.find(e => e.id === id);
   
@@ -114,7 +154,7 @@ const MovieDetails = ({ entries, onBack }: { entries: MovieEntry[]; onBack: () =
     );
   }
 
-  return <Details entry={entry} onBack={onBack} />;
+  return <Details entry={entry} onBack={onBack} selectedUser={selectedUser} onRatingUpdate={reloadEntries} />;
 };
 
 const App = () => (

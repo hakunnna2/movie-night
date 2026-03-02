@@ -7,9 +7,10 @@ import { ImageWithSkeleton } from './ImageWithSkeleton';
 interface MovieCardProps {
   entry: MovieEntry;
   onClick: () => void;
+  selectedUser?: 'jojo' | 'dodo' | null;
 }
 
-export const MovieCard = memo(({ entry, onClick }: MovieCardProps) => {
+export const MovieCard = memo(({ entry, onClick, selectedUser }: MovieCardProps) => {
   const isWatched = entry.status === 'watched';
   const [imgError, setImgError] = useState(false);
 
@@ -95,10 +96,24 @@ export const MovieCard = memo(({ entry, onClick }: MovieCardProps) => {
         </div>
 
         <div className="mt-auto space-y-4">
-          {/* Your Star Rating (Only for Watched) */}
-          {isWatched && (
+          {/* Dual Ratings - Only for Movies (watched), not TV shows */}
+          {isWatched && entry.type === 'movie' && entry.ratings && (
+            <div className="flex gap-2">
+              <div className="flex items-center gap-1 bg-[#fbbf24]/15 px-2.5 py-1 rounded-full">
+                <span className="text-[8px] font-bold text-[#fbbf24]/80">JoJo</span>
+                <span className="text-xs font-black text-[#fbbf24]">{entry.ratings.jojo}</span>
+              </div>
+              <div className="flex items-center gap-1 bg-[#c084fc]/15 px-2.5 py-1 rounded-full">
+                <span className="text-[8px] font-bold text-[#c084fc]/80">DoDo</span>
+                <span className="text-xs font-black text-[#c084fc]">{entry.ratings.dodo}</span>
+              </div>
+            </div>
+          )}
+          
+          {/* Fallback to single rating if dual ratings not available - Movies only */}
+          {isWatched && entry.type === 'movie' && !entry.ratings && entry.rating && (
             <div className="flex">
-              <StarRating rating={entry.rating || 0} size={14} />
+              <StarRating rating={entry.rating} size={14} />
             </div>
           )}
           

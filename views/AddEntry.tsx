@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Save, Film, Tv, Calendar } from 'lucide-react';
-import { MediaType, MovieEntry, WatchStatus } from '../types';
-import { StarRating } from '../components/StarRating';
+import React, { useState, useEffect, useRef } from 'react';
+import { ArrowLeft, Save, Film, Tv, Calendar, Upload, X, Plus, Link } from 'lucide-react';
+import { MediaType, MovieEntry, WatchStatus, VideoMedia } from '../types';
 
 interface AddEntryProps {
   onBack: () => void;
@@ -14,16 +13,50 @@ export const AddEntry: React.FC<AddEntryProps> = ({ onBack, onSave, existingEntr
   const [type, setType] = useState<MediaType>(existingEntry?.type || 'movie');
   const [status, setStatus] = useState<WatchStatus>(existingEntry?.status || 'watched');
   const [date, setDate] = useState(existingEntry?.date ? new Date(existingEntry.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
-  const [rating, setRating] = useState(existingEntry?.rating || 3);
   const [story, setStory] = useState(existingEntry?.story || '');
   const [reason, setReason] = useState(existingEntry?.reason || '');
   const [posterUrl, setPosterUrl] = useState(existingEntry?.posterUrl || '');
+  const [videos, setVideos] = useState<VideoMedia[]>(existingEntry?.videos || []);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (existingEntry && existingEntry.status === 'upcoming') {
       setStatus('watched');
     }
   }, [existingEntry]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      setPosterUrl(result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleClearImage = () => {
+    setPosterUrl('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleAddVideo = () => {
+    setVideos([...videos, { title: '', url: '', type: 'local' }]);
+  };
+
+  const handleRemoveVideo = (index: number) => {
+    setVideos(videos.filter((_, i) => i !== index));
+  };
+
+  const handleUpdateVideo = (index: number, field: keyof VideoMedia, value: string) => {
+    const updated = [...videos];
+    updated[index] = { ...updated[index], [field]: value };
+    setVideos(updated);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +67,8 @@ export const AddEntry: React.FC<AddEntryProps> = ({ onBack, onSave, existingEntr
       status,
       date,
       posterUrl,
-      ...(status === 'watched' ? { rating, story } : { reason }),
+      videos: videos.filter(v => v.url.trim() !== ''), // Only include videos with URLs
+      ...(status === 'watched' ? { story } : { reason }),
     };
     onSave(entry);
   };
@@ -131,28 +165,146 @@ export const AddEntry: React.FC<AddEntryProps> = ({ onBack, onSave, existingEntr
             </div>
           </div>
 
-          {/* Poster URL */}
+          {/* Poster Image */}
           <div>
-            <label className="block text-xs font-bold text-ink-300 uppercase mb-2 ml-1">Poster URL (Optional)</label>
-            <input
-              type="url"
-              value={posterUrl}
-              onChange={(e) => setPosterUrl(e.target.value)}
-              placeholder="https://image.tmdb.org/..."
-              className="w-full bg-night-900 border border-night-700 focus:border-popcorn rounded-xl px-5 py-4 text-ink-100 placeholder-night-700 focus:outline-none transition-colors"
-            />
+            <label className="block text-xs font-bold text-ink-300 uppercase mb-3 ml-1">Poster Image (Optional)</label>
+            
+            {/* Image Preview */}
+            {posterUrl && (
+              <div className="mb-4 relative inline-block">
+                <img
+                  src={posterUrl}
+                  alt="Poster preview"
+                  className="h-40 rounded-lg border border-night-700 object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleClearImage}
+                  className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-colors"
+                  title="Clear image"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              {/* File Upload */}
+              <div>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full bg-night-900 border-2 border-dashed border-night-700 hover:border-popcorn rounded-xl px-5 py-4 text-ink-300 hover:text-popcorn transition-colors font-bold flex items-center justify-center gap-2"
+                >
+                  <Upload size={18} />
+                  Upload Image
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </div>
+
+              {/* URL Input */}
+              <input
+                type="url"
+                value={posterUrl.startsWith('data:') ? '' : posterUrl}
+                onChange={(e) => setPosterUrl(e.target.value)}
+                placeholder="Or paste image URL..."
+                className="w-full bg-night-900 border border-night-700 focus:border-popcorn rounded-xl px-5 py-4 text-ink-100 placeholder-night-700 focus:outline-none transition-colors text-sm"
+              />
+            </div>
+          </div>
+
+          {/* Video Links */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <label className="block text-xs font-bold text-ink-300 uppercase ml-1">Video Links (Optional)</label>
+              <button
+                type="button"
+                onClick={handleAddVideo}
+                className="flex items-center gap-1 text-xs font-bold text-popcorn hover:text-popcorn-glow transition-colors"
+              >
+                <Plus size={14} />
+                Add Video
+              </button>
+            </div>
+            
+            {videos.length === 0 ? (
+              <div className="bg-night-900/50 border border-night-700 rounded-xl px-5 py-6 text-center">
+                <Link size={24} className="mx-auto mb-2 text-ink-400" />
+                <p className="text-ink-400 text-sm">No video links added</p>
+                <p className="text-ink-500 text-xs mt-1">Add links to movies/episodes stored online</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {videos.map((video, index) => (
+                  <div key={index} className="bg-night-900/50 border border-night-700 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1 space-y-3">
+                        <input
+                          type="text"
+                          value={video.title}
+                          onChange={(e) => handleUpdateVideo(index, 'title', e.target.value)}
+                          placeholder="Video title (e.g., Movie, Episode 1)"
+                          className="w-full bg-night-800 border border-night-700 focus:border-popcorn rounded-lg px-4 py-2 text-ink-100 placeholder-night-600 focus:outline-none transition-colors text-sm"
+                        />
+                        <input
+                          type="url"
+                          value={video.url}
+                          onChange={(e) => handleUpdateVideo(index, 'url', e.target.value)}
+                          placeholder="Video URL (Google Drive, YouTube, etc.)"
+                          className="w-full bg-night-800 border border-night-700 focus:border-popcorn rounded-lg px-4 py-2 text-ink-100 placeholder-night-600 focus:outline-none transition-colors text-sm"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateVideo(index, 'type', 'local')}
+                            className={`flex-1 px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+                              video.type === 'local' 
+                                ? 'bg-popcorn text-night-900' 
+                                : 'bg-night-800 text-ink-400 hover:text-ink-200'
+                            }`}
+                          >
+                            Local/Drive
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateVideo(index, 'type', 'embed')}
+                            className={`flex-1 px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+                              video.type === 'embed' 
+                                ? 'bg-popcorn text-night-900' 
+                                : 'bg-night-800 text-ink-400 hover:text-ink-200'
+                            }`}
+                          >
+                            YouTube Embed
+                          </button>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveVideo(index)}
+                        className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 rounded-lg transition-colors"
+                        title="Remove video"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Conditional Fields based on Status */}
           {status === 'watched' ? (
             <div className="bg-night-900/50 p-6 rounded-2xl border border-night-700">
-              <div className="mb-6">
-                <label className="block text-xs font-bold text-ink-300 uppercase mb-3">Our Rating</label>
-                <div className="inline-block bg-night-800 px-4 py-3 rounded-xl border border-night-700">
-                  <StarRating rating={rating} interactive onRate={setRating} size={28} />
-                </div>
-              </div>
-
               <div>
                 <label className="block text-xs font-bold text-ink-300 uppercase mb-2 ml-1">The Story</label>
                 <textarea

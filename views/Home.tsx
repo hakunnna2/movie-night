@@ -1,15 +1,18 @@
 import { useState, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MovieEntry, FilterType, SortOption } from '../types';
 import { MovieCard } from '../components/MovieCard';
 import { FilterBar } from '../components/FilterBar';
-import { Search, X, Ticket, Film, Sparkles } from 'lucide-react';
+import { Search, X, Ticket, Film, Sparkles, Armchair } from 'lucide-react';
 
 interface HomeProps {
   entries: MovieEntry[];
   onNavigate: (view: 'details', id?: string) => void;
+  selectedUser?: 'jojo' | 'dodo' | null;
 }
 
-export const Home = ({ entries, onNavigate }: HomeProps) => {
+export const Home = ({ entries, onNavigate, selectedUser }: HomeProps) => {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<FilterType>('all');
   const [sort, setSort] = useState<SortOption>('date-desc');
   const [search, setSearch] = useState<string>('');
@@ -57,7 +60,10 @@ export const Home = ({ entries, onNavigate }: HomeProps) => {
     
     let totalMinutes = 0;
     let totalRating = 0;
+    let totalJojoRating = 0;
+    let totalDodoRating = 0;
     let ratedCount = 0;
+    let dualRatedCount = 0;
     const genreMap: Record<string, number> = {};
     let earliestDate = new Date();
     let latestDate = new Date('2000-01-01');
@@ -84,8 +90,17 @@ export const Home = ({ entries, onNavigate }: HomeProps) => {
         }
       }
 
-      // Calculate average rating and best movie
-      if (entry.rating) {
+      // Calculate average ratings (dual ratings preferred)
+      if (entry.ratings) {
+        totalJojoRating += entry.ratings.jojo;
+        totalDodoRating += entry.ratings.dodo;
+        dualRatedCount++;
+        const avgRating = (entry.ratings.jojo + entry.ratings.dodo) / 2;
+        if (avgRating > bestRating) {
+          bestRating = avgRating;
+          bestMovie = entry;
+        }
+      } else if (entry.rating) {
         totalRating += entry.rating;
         ratedCount++;
         if (entry.rating > bestRating) {
@@ -108,7 +123,9 @@ export const Home = ({ entries, onNavigate }: HomeProps) => {
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
     const days = watched.length > 0 ? Math.ceil((latestDate.getTime() - earliestDate.getTime()) / (1000 * 60 * 60 * 24)) : 0;
-    const avgRating = ratedCount > 0 ? (totalRating / ratedCount).toFixed(1) : 0;
+    const avgRating = ratedCount > 0 ? (totalRating / ratedCount).toFixed(1) : (dualRatedCount > 0 ? ((totalJojoRating + totalDodoRating) / (dualRatedCount * 2)).toFixed(1) : '0');
+    const avgJojoRating = dualRatedCount > 0 ? (totalJojoRating / dualRatedCount).toFixed(1) : '0';
+    const avgDodoRating = dualRatedCount > 0 ? (totalDodoRating / dualRatedCount).toFixed(1) : '0';
     const favoriteGenre = Object.entries(genreMap).sort((a, b) => b[1] - a[1])[0];
     const avgPerMonth = watched.length > 0 && days > 0 ? (watched.length / (days / 30.44)).toFixed(1) : '0';
     const nextMovieDate = upcoming.length > 0 ? new Date(upcoming[0].date) : null;
@@ -121,6 +138,8 @@ export const Home = ({ entries, onNavigate }: HomeProps) => {
       count: watched.length,
       days,
       avgRating,
+      avgJojoRating,
+      avgDodoRating,
       favoriteGenre: favoriteGenre ? favoriteGenre[0] : 'None',
       avgPerMonth,
       bestMovie,
@@ -141,6 +160,8 @@ export const Home = ({ entries, onNavigate }: HomeProps) => {
             <div className="w-11 h-11 rounded-full bg-[#c084fc] flex items-center justify-center text-night-900 text-sm font-black border-4 border-[#0f172a] shadow-xl avatar-N">N</div>
           </div>
         </div>
+        
+
         <div className="space-y-2 header-content">
           <span className="text-[#94a3b8] text-[10px] font-black uppercase tracking-[0.5em] block">Our Private Cinema Journal</span>
           <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter">
@@ -266,6 +287,7 @@ export const Home = ({ entries, onNavigate }: HomeProps) => {
                 key={entry.id} 
                 entry={entry} 
                 onClick={() => onNavigate('details', entry.id)}
+                selectedUser={selectedUser}
               />
             ))}
           </div>
@@ -300,6 +322,7 @@ export const Home = ({ entries, onNavigate }: HomeProps) => {
                 key={entry.id} 
                 entry={entry} 
                 onClick={() => onNavigate('details', entry.id)}
+                selectedUser={selectedUser}
               />
             ))}
           </div>
@@ -314,6 +337,12 @@ export const Home = ({ entries, onNavigate }: HomeProps) => {
                 <span>Two Seats, One Screen</span>
             </div>
             <p className="font-hand text-xl text-ink-300 opacity-40">Made with 💛 for movie nights.</p>
+            <button
+              onClick={() => navigate('/admin')}
+              className="mt-4 px-4 py-2 text-xs font-bold uppercase tracking-widest text-ink-400 hover:text-popcorn transition-colors opacity-60 hover:opacity-100"
+            >
+              Admin Panel
+            </button>
         </div>
       </footer>
     </div>
