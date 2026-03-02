@@ -16,6 +16,13 @@ export interface VideoMedia {
   type?: 'local' | 'embed'; // 'local' for file path, 'embed' for YouTube
 }
 
+export interface Comment {
+  id: string;
+  user: 'jojo' | 'dodo';
+  text: string;
+  date: string; // ISO date string
+}
+
 export interface DualRating {
   jojo: number; // 1-5 rating from JoJo
   dodo: number; // 1-5 rating from DoDo
@@ -40,6 +47,7 @@ export interface MovieEntry {
   captures?: string[]; // Array of image URLs for the gallery
   videos?: VideoMedia[]; // Array of video movies/trailers (local files or embeds)
   watchProgress?: number; // Seconds watched for resume feature
+  comments?: Comment[]; // Array of comments on the entry
 }
 
 export type SortOption = 'date-desc' | 'date-asc' | 'rating-desc';

@@ -1,8 +1,9 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MovieEntry, FilterType, SortOption } from '../types';
 import { MovieCard } from '../components/MovieCard';
 import { FilterBar } from '../components/FilterBar';
+import { NotificationContainer, Notification, NotificationType } from '../components/NotificationToast';
 import { Search, X, Ticket, Film, Sparkles, Armchair } from 'lucide-react';
 
 interface HomeProps {
@@ -17,6 +18,69 @@ export const Home = ({ entries, onNavigate, selectedUser }: HomeProps) => {
   const [sort, setSort] = useState<SortOption>('date-desc');
   const [search, setSearch] = useState<string>('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [lastEntriesLength, setLastEntriesLength] = useState(entries.length);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [lastEntriesLength, setLastEntriesLength] = useState(entries.length);
+
+  // Add notification
+  const addNotification = useCallback((notification: Omit<Notification, 'id'>) => {
+    const id = Date.now().toString();
+    const newNotification: Notification = {
+      ...notification,
+      id,
+      duration: notification.duration ?? 5000,
+    };
+    setNotifications(prev => [...prev, newNotification]);
+  }, []);
+
+  // Close notification
+  const closeNotification = useCallback((id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  }, []);
+
+  // Detect new entries or changes
+  useEffect(() => {
+    // If entries length increased, a new entry was added
+    if (entries.length > lastEntriesLength) {
+      const newEntry = entries[0]; // Assuming new entries are added at the beginning
+      const notificationType: NotificationType = newEntry.type === 'tv' ? 'episode-added' : 'movie-added';
+      
+      addNotification({
+        type: notificationType,
+        title: newEntry.type === 'tv' ? 'New Episode Added' : 'New Movie Added',
+        message: `"${newEntry.title}" has been added to your journal!`,
+        duration: 5000,
+      });
+      
+      setLastEntriesLength(entries.length);
+    } else if (entries.length < lastEntriesLength) {
+      setLastEntriesLength(entries.length);
+    }
+  }, [entries, lastEntriesLength, addNotification]);
+
+  // Check for new comments on existing entries
+  useEffect(() => {
+    entries.forEach(entry => {
+      if (entry.comments && entry.comments.length > 0) {
+        const latestComment = entry.comments[entry.comments.length - 1];
+        const commentDate = new Date(latestComment.date);
+        const now = new Date();
+        const secondsAgo = (now.getTime() - commentDate.getTime()) / 1000;
+        
+        // Only show notification if comment is very recent (less than 1 second ago)
+        if (secondsAgo < 1) {
+          addNotification({
+            type: 'comment-added',
+            title: `New Comment by ${latestComment.user === 'jojo' ? 'JoJo' : 'DoDo'}`,
+            message: `Comment added to "${entry.title}"`,
+            duration: 5000,
+          });
+        }
+      }
+    });
+  }, [entries, addNotification]);
 
   const processEntries = useCallback((status: 'watched' | 'upcoming') => {
     const searchLower = search.toLowerCase();
@@ -345,6 +409,9 @@ export const Home = ({ entries, onNavigate, selectedUser }: HomeProps) => {
             </button>
         </div>
       </footer>
+
+      {/* Notification Container */}
+      <NotificationContainer notifications={notifications} onClose={closeNotification} />
     </div>
   );
 };
