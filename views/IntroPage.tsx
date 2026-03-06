@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { MovieEntry } from '../types';
 import { ArrowRight, Eye, EyeOff, Lock } from 'lucide-react';
-import { getEpisodeStatus } from '../services/storage';
 
 interface IntroPageProps {
   entries: MovieEntry[];
@@ -103,9 +102,9 @@ export const IntroPage = ({ entries, onContinue, selectedUser, onSelectUser }: I
       if (entry.type === 'tv' && entry.episodeRuntimeMinutes) {
         let watchedEpisodes = 0;
 
-        if (selectedUser && entry.episodes?.length) {
+        if (entry.episodes?.length) {
           watchedEpisodes = entry.episodes.filter(episode =>
-            getEpisodeStatus(entry.id, episode.number, selectedUser) === 'watched'
+            episode.status === 'watched'
           ).length;
         }
 
