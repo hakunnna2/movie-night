@@ -84,18 +84,16 @@ export const IntroPage = ({ entries, onContinue, selectedUser, onSelectUser }: I
     const watched = entries.filter(e => e.status === 'watched');
     
     let totalMinutes = 0;
-    let totalRating = 0;
-    let totalJojoRating = 0;
-    let totalDodoRating = 0;
-    let ratedCount = 0;
-    let dualRatedCount = 0;
     const genreMap: Record<string, number> = {};
     let watchedTvEpisodeCount = 0;
     let earliestDate = new Date();
     let latestDate = new Date('2000-01-01');
 
-    watched.forEach(entry => {
-      if (entry.type === 'movie' && entry.duration) {
+    // Also count episodes from "upcoming" shows that are marked as "watched"
+    const allEntries = entries;
+    
+    allEntries.forEach(entry => {
+      if (entry.status === 'watched' && entry.type === 'movie' && entry.duration) {
         totalMinutes += parseMovieMinutes(entry.duration);
       }
 
@@ -108,7 +106,7 @@ export const IntroPage = ({ entries, onContinue, selectedUser, onSelectUser }: I
           ).length;
         }
 
-        if (watchedEpisodes === 0) {
+        if (watchedEpisodes === 0 && entry.status === 'watched') {
           const fromEpisodes = entry.episodes?.length || 0;
           const fromVideos = entry.videos?.length || 0;
           const fromDuration = getEpisodeCountFromDuration(entry.duration);
@@ -119,41 +117,28 @@ export const IntroPage = ({ entries, onContinue, selectedUser, onSelectUser }: I
         totalMinutes += watchedEpisodes * entry.episodeRuntimeMinutes;
       }
 
-      if (entry.ratings) {
-        const jojoRating = typeof entry.ratings.jojo === 'number' ? entry.ratings.jojo : 0;
-        const dodoRating = typeof entry.ratings.dodo === 'number' ? entry.ratings.dodo : 0;
-        totalJojoRating += jojoRating;
-        totalDodoRating += dodoRating;
-        dualRatedCount++;
-      } else if (entry.rating) {
-        totalRating += entry.rating;
-        ratedCount++;
+      if (entry.status === 'watched') {
+        entry.genres?.forEach(genre => {
+          genreMap[genre] = (genreMap[genre] || 0) + 1;
+        });
+
+        // Track dates
+        const entryDate = new Date(entry.date);
+        if (entryDate < earliestDate) earliestDate = entryDate;
+        if (entryDate > latestDate) latestDate = entryDate;
       }
-
-      entry.genres?.forEach(genre => {
-        genreMap[genre] = (genreMap[genre] || 0) + 1;
-      });
-
-      // Track dates
-      const entryDate = new Date(entry.date);
-      if (entryDate < earliestDate) earliestDate = entryDate;
-      if (entryDate > latestDate) latestDate = entryDate;
     });
 
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
-    const avgRating = ratedCount > 0 ? (totalRating / ratedCount).toFixed(1) : (dualRatedCount > 0 ? ((totalJojoRating + totalDodoRating) / (dualRatedCount * 2)).toFixed(1) : '0');
-    const avgJojoRating = dualRatedCount > 0 ? (totalJojoRating / dualRatedCount).toFixed(1) : '0';
-    const avgDodoRating = dualRatedCount > 0 ? (totalDodoRating / dualRatedCount).toFixed(1) : '0';
     const days = watched.length > 0 ? Math.ceil((new Date().getTime() - earliestDate.getTime()) / (1000 * 60 * 60 * 24)) : 0;
     const perMonth = watched.length > 0 ? (watched.length / Math.max(1, Math.ceil(days / 30))).toFixed(1) : '0';
     const favoriteGenre = Object.entries(genreMap).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Unknown';
     const watchedMovieCount = watched.filter(entry => entry.type === 'movie').length;
-    const watchedTvCount = watched.filter(entry => entry.type === 'tv').length;
-    const memoryCount = watchedMovieCount + (watchedTvEpisodeCount > 0 ? watchedTvEpisodeCount : watchedTvCount);
+    const memoryCount = watchedMovieCount + watchedTvEpisodeCount;
 
-    return { hours, minutes, avgRating, avgJojoRating, avgDodoRating, days, perMonth, favoriteGenre, titleCount: watched.length, memoryCount };
-  }, [entries, selectedUser]);
+    return { hours, minutes, days, perMonth, favoriteGenre, titleCount: watched.length, memoryCount };
+  }, [entries]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-night-900 via-purple-900/20 to-night-900 flex items-center justify-center p-4">
@@ -208,16 +193,6 @@ export const IntroPage = ({ entries, onContinue, selectedUser, onSelectUser }: I
 
           {/* Detailed stats */}
           <div className="grid grid-cols-2 gap-3 md:gap-4 mb-6">
-            <div className="bg-white/5 border border-white/10 rounded-xl p-3 md:p-4 text-center">
-              <div className="text-[10px] md:text-xs text-[#fbbf24] tracking-widest font-semibold mb-1">JoJo's Avg</div>
-              <div className="text-2xl md:text-3xl font-bold text-[#fbbf24]">{timeTogether.avgJojoRating} <span className="text-base md:text-xl">⭐</span></div>
-            </div>
-
-            <div className="bg-white/5 border border-white/10 rounded-xl p-3 md:p-4 text-center">
-              <div className="text-[10px] md:text-xs text-[#c084fc] tracking-widest font-semibold mb-1">DoDo's Avg</div>
-              <div className="text-2xl md:text-3xl font-bold text-[#c084fc]">{timeTogether.avgDodoRating} <span className="text-base md:text-xl">⭐</span></div>
-            </div>
-
             <div className="bg-white/5 border border-white/10 rounded-xl p-3 md:p-4 text-center">
               <div className="text-[10px] md:text-xs text-ink-400 uppercase tracking-widest font-semibold mb-1">Per Month</div>
               <div className="text-2xl md:text-3xl font-bold text-cyan-400">{timeTogether.perMonth}</div>
