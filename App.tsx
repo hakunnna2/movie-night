@@ -5,13 +5,11 @@ import { MovieEntry } from './types';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ScrollToTopButton } from './components/ScrollToTopButton';
 import { AppContextProvider } from './context/AppContext';
-import { ProtectedAdmin } from './components/ProtectedAdmin';
 
 // Lazy load views for code splitting
 const Home = lazy(() => import('./views/Home').then(m => ({ default: m.Home })));
 const Details = lazy(() => import('./views/Details').then(m => ({ default: m.Details })));
 const IntroPage = lazy(() => import('./views/IntroPage').then(m => ({ default: m.IntroPage })));
-const Admin = lazy(() => import('./views/Admin').then(m => ({ default: m.Admin })));
 const SELECTED_USER_KEY = 'movie-night-selected-user';
 
 // Loading fallback component for Suspense boundaries
@@ -67,7 +65,9 @@ const AppContent = () => {
     };
     
     loadData();
-  }, [location.pathname]);
+  // Load data once on mount; location.pathname is read but should not re-trigger fetches
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const reloadEntries = async () => {
     const data = await getEntriesAsync();
@@ -112,16 +112,6 @@ const AppContent = () => {
           <Route 
             path="/movie/:id" 
             element={<MovieDetails entries={entries} onBack={() => navigateTo('home')} selectedUser={selectedUser} reloadEntries={reloadEntries} />} 
-          />
-          <Route 
-            path="/admin" 
-            element={
-              <ProtectedAdmin>
-                <div className="animate-fade-in">
-                  <Admin entries={entries} onBack={() => navigateTo('home')} onEntriesUpdate={reloadEntries} />
-                </div>
-              </ProtectedAdmin>
-            } 
           />
           <Route 
             path="*" 

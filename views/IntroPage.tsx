@@ -9,10 +9,10 @@ interface IntroPageProps {
   onSelectUser: (user: 'jojo' | 'dodo' | null) => void;
 }
 
-// User credentials
-const ADMIN_USERS = {
-  jojo: '2004',
-  dodo: 'LUPIN'
+// User credentials loaded from environment variables
+const ADMIN_USERS: Record<string, string> = {
+  jojo: import.meta.env.VITE_JOJO_PIN || '',
+  dodo: import.meta.env.VITE_DODO_PIN || '',
 };
 
 export const IntroPage = ({ entries, onContinue, selectedUser, onSelectUser }: IntroPageProps) => {
@@ -352,37 +352,6 @@ export const IntroPage = ({ entries, onContinue, selectedUser, onSelectUser }: I
         </div>
       )}
 
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes avatar-float-A {
-          0% {
-            transform: translate(-80px, -80px) scale(0.5);
-            opacity: 0;
-          }
-          100% {
-            transform: translate(0, 0) scale(1);
-            opacity: 1;
-          }
-        }
-
-        @keyframes avatar-float-N {
-          0% {
-            transform: translate(80px, -80px) scale(0.5);
-            opacity: 0;
-          }
-          100% {
-            transform: translate(0, 0) scale(1);
-            opacity: 1;
-          }
-        }
-
-        .avatar-A {
-          animation: avatar-float-A 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-
-        .avatar-N {
-          animation: avatar-float-N 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-      `}} />
     </div>
   );
 };

@@ -45,6 +45,8 @@ export interface MovieEntry {
   videos?: VideoMedia[]; // Array of video movies/trailers (local files or embeds)
   watchProgress?: number; // Seconds watched for resume feature
   comments?: Comment[]; // Array of comments on the entry
+  ratings?: DualRating; // 1-5 rating from JoJo and DoDo
+  rating?: number; // Legacy 1-5 rating
 }
 
 export type SortOption = 'date-desc' | 'date-asc';

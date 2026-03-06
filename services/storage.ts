@@ -1,4 +1,5 @@
 import { MovieEntry } from '../types';
+import { updateRating as firebaseUpdateRating } from './firebase.service';
 
 export interface CommentMessage {
   id: string;
@@ -387,6 +388,10 @@ export const deleteEntry = async (entryId: string): Promise<void> => {
     console.error('Failed to delete entry:', error);
     throw error;
   }
+};
+
+export const saveRating = (entryId: string, person: 'jojo' | 'dodo', rating: number): void => {
+  firebaseUpdateRating(entryId, person, rating);
 };
 
 export const saveWatchProgress = (entryId: string, seconds: number): void => {

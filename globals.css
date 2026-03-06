@@ -29,3 +29,50 @@
     @apply bg-black/40 rounded-2xl border border-white/5 shadow-2xl;
   }
 }
+
+/* Notification toast slide-in */
+@keyframes slide-in {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+/* IntroPage avatar float animations */
+@keyframes avatar-float-A {
+  0% {
+    transform: translate(-80px, -80px) scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes avatar-float-N {
+  0% {
+    transform: translate(80px, -80px) scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+}
+
+.avatar-A {
+  animation: avatar-float-A 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.avatar-N {
+  animation: avatar-float-N 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}

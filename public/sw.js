@@ -2,9 +2,7 @@ const CACHE_NAME = 'movie-journal-v1';
 const RUNTIME_CACHE = 'movie-journal-runtime-v1';
 const ASSETS_TO_CACHE = [
   '/',
-  '/index.html',
-  '/index.tsx',
-  '/index.css'
+  '/index.html'
 ];
 
 // Install event

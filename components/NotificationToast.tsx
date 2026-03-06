@@ -69,22 +69,6 @@ const NotificationToast: React.FC<NotificationToastProps> = ({ notification, onC
       >
         <X size={16} />
       </button>
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes slide-in {
-          from {
-            transform: translateX(400px);
-            opacity: 0;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
-        }
-        
-        .animate-slide-in {
-          animation: slide-in 0.3s ease-out;
-        }
-      `}} />
     </div>
   );
 };

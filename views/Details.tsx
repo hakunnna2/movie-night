@@ -12,6 +12,15 @@ interface DetailsProps {
   selectedUser?: 'jojo' | 'dodo' | null;
 }
 
+// Watchdog component at module scope to avoid re-creation on every render
+function IframeWatchdog({ setFailed, timeout = 4000 }: { setFailed: () => void; timeout?: number }) {
+  useEffect(() => {
+    const t = setTimeout(() => setFailed(), timeout);
+    return () => clearTimeout(t);
+  }, [setFailed, timeout]);
+  return null;
+}
+
 export const Details = ({ entry, onBack, selectedUser }: DetailsProps) => {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   
@@ -172,15 +181,6 @@ export const Details = ({ entry, onBack, selectedUser }: DetailsProps) => {
   };
 
   const externalVideoLink = getExternalVideoLink(safeVideoUrl);
-
-  // Simple watchdog component inlined to avoid extra file.
-  function IframeWatchdog({ setFailed, timeout = 4000 }: { setFailed: () => void; timeout?: number }) {
-    useEffect(() => {
-      const t = setTimeout(() => setFailed(), timeout);
-      return () => clearTimeout(t);
-    }, [setFailed, timeout]);
-    return null;
-  }
 
   const handleNext = useCallback((e?: MouseEvent) => {
     e?.stopPropagation();
