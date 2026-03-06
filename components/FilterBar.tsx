@@ -39,7 +39,7 @@ export const FilterBar = ({ filter, setFilter, sort, setSort }: FilterBarProps) 
         >
           <option value="date-desc" className="bg-night-800">Newest</option>
           <option value="date-asc" className="bg-night-800">Oldest</option>
-          <option value="rating-desc" className="bg-night-800">Top Rated</option>
+
         </select>
       </div>
     </div>

@@ -1,5 +1,11 @@
- import { MovieEntry } from '../types';
-import { CommentMessage, loadUserProgress, updateWatchProgress as firebaseUpdateProgress, updateRating as firebaseUpdateRating, updateEpisodeProgress as firebaseUpdateEpisodeProgress, updateEpisodeRating as firebaseUpdateEpisodeRating, updateEpisodeStatus as firebaseUpdateEpisodeStatus, updateComment as firebaseUpdateComment, saveMovieEntries, loadMovieEntries, subscribeSharedRating as firebaseSubscribeSharedRating } from './firebase.service';
+import { MovieEntry } from '../types';
+
+export interface CommentMessage {
+  id: string;
+  text: string;
+  sender: 'shared' | 'jojo' | 'dodo';
+  createdAt: number;
+}
 
 const MOVIES_DATA: MovieEntry[] = [
   {
@@ -8,11 +14,6 @@ const MOVIES_DATA: MovieEntry[] = [
     "type": "movie",
     "status": "watched",
     "date": "2025-12-04",
-    "rating": 4,
-    "ratings": {
-      "jojo": 4,
-      "dodo": 4
-    },
     "genres": ["Action", "Comedy", "Drama"],
     "duration": "1h 43m",
     "story": "We expected a light and funny movie night, but EXIT surprised us. When a strange toxic gas spreads through the city, two ordinary people are forced to escape using creativity, teamwork, and courage. The movie balances tension and humor really well, keeping us stressed and smiling at the same time. By the end, it felt hopeful and energetic, the kind of movie that makes a movie night memorable.",
@@ -38,11 +39,6 @@ const MOVIES_DATA: MovieEntry[] = [
     "type": "movie",
     "status": "watched",
     "date": "2025-12-12",
-    "rating": 4,
-    "ratings": {
-      "jojo": 4,
-      "dodo": 4
-    },
     "genres": ["Drama", "Thriller"],
     "duration": "2h 06m",
     "story": "What started as a normal drive quickly turned into a tense movie night. After a tunnel suddenly collapses, one man is trapped underground with limited time and hope. While rescue teams struggle outside, the movie focuses on patience, mental strength, and the quiet fight to stay alive. It's a slow, heavy story that left us silent for a moment after it ended.",
@@ -63,11 +59,6 @@ const MOVIES_DATA: MovieEntry[] = [
     "type": "movie",
     "status": "watched",
     "date": "2025-12-19",
-    "rating": 5,
-    "ratings": {
-      "jojo": 5,
-      "dodo": 5
-    },
     "genres": ["Drama", "Family"],
     "duration": "1h 33m",
     "story": "This movie night was beautiful and emotional. It tells the story of two young siblings who travel a long, difficult path just to reach school in a remote mountain village. What starts as a simple journey becomes a powerful story about childhood, education, and the sacrifices people make to learn. It reminded us how lucky we are and left us quietly thinking after the credits rolled.",
@@ -85,11 +76,6 @@ const MOVIES_DATA: MovieEntry[] = [
     "type": "movie",
     "status": "watched",
     "date": "2025-12-26",
-    "rating": 5,
-    "ratings": {
-      "jojo": 5,
-      "dodo": 5
-    },
     "genres": ["Comedy", "Family"],
     "duration": "1h 43m",
     "story": "A perfect Christmas movie night! Home Alone is a classic we watched together, full of humor, clever traps, and holiday spirit. The story of young Kevin defending his home from two clumsy burglars never gets old, no matter how many times we've seen it. It's funny, heartwarming, and reminded us why this movie is a tradition for so many families around the world.",
@@ -128,11 +114,6 @@ const MOVIES_DATA: MovieEntry[] = [
     "type": "movie",
     "status": "watched",
     "date": "2026-01-09",
-    "rating": 5,
-    "ratings": {
-      "jojo": 5,
-      "dodo": 5
-    },
     "genres": ["Comedy", "Family"],
     "duration": "2h 00m",
     "story": "We continued the Home Alone tradition with the second part, and it was just as fun as the first. This time Kevin is lost in New York City during Christmas, facing the same burglars with even crazier traps and more laughs. The movie kept the same charm, humor, and heart, making it another perfect movie night filled with smiles and holiday spirit.",
@@ -149,16 +130,11 @@ const MOVIES_DATA: MovieEntry[] = [
     "title": "Brother (Abi)",
     "originalTitle": "Abi",
     "type": "tv",
-    "status": "watched",
-    "date": "2026-03-04",
-    "rating": 5,
-    "ratings": {
-      "jojo": 5,
-      "dodo": 5
-    },
+    "status": "upcoming",
+    "date": "2026-03-11",
     "genres": ["Drama", "Family", "Psychological"],
-    "duration": "Weekly Series • 8 Episodes Available",
-    "episodeRuntimeMinutes": 150,
+    "duration": "Weekly Series • 9 Episodes Total",
+    "episodeRuntimeMinutes": 190,
     "story": "The Turkish series Abi (My Brother) revolves around the idea that family is a true test. It follows the story of Çağla, a lawyer who was pushed into her profession by the harshness of life and the absence of a real family. On the other side stands Doğan, a man from a large and wealthy family who ran away in an attempt to escape a past filled with secrets. But life forces a confrontation, and the doors to a deep relationship open, where each of them carries postponed wounds—wounds they can neither open nor close… wounds called family. New episodes air weekly.",
     "posterUrl": "/assets/ABIM/abi.png",
     "captures": [
@@ -169,48 +145,64 @@ const MOVIES_DATA: MovieEntry[] = [
         "number": 1,
         "title": "Episode 1",
         "summary": "The beginning of Çağla and Doğan's story. A chance encounter brings together two people from completely different worlds, setting the stage for a complex relationship built on secrets and unspoken wounds.",
-        "date": "2026-01-13"
+        "date": "2026-01-13",
+        "status": "watched"
       },
       {
         "number": 2,
         "title": "Episode 2",
         "summary": "As their lives become more intertwined, Çağla and Doğan must confront the weight of their pasts. Family loyalties are tested, and the cracks in their facades begin to show.",
-        "date": "2026-01-20"
+        "date": "2026-01-20",
+        "status": "watched"
       },
       {
         "number": 3,
         "title": "Episode 3",
         "summary": "Deeper revelations emerge about Doğan's wealthy family and the reasons he left. Çağla's professional and personal boundaries blur as she gets drawn further into his world.",
-        "date": "2026-01-27"
+        "date": "2026-01-27",
+        "status": "watched"
       },
       {
         "number": 4,
         "title": "Episode 4",
         "summary": "The past refuses to stay buried. Both characters face choices that will define their futures, while the question of whether family is a blessing or a burden becomes more urgent.",
-        "date": "2026-02-03"
+        "date": "2026-02-03",
+        "status": "watched"
       },
       {
         "number": 5,
         "title": "Episode 5",
         "summary": "Trust becomes the central theme as secrets threaten to destroy everything they've built. Both Çağla and Doğan must decide how much they're willing to sacrifice for the truth.",
-        "date": "2026-02-10"
+        "date": "2026-02-10",
+        "status": "watched"
       },
       {
         "number": 6,
         "title": "Episode 6",
         "summary": "Confrontations reach a boiling point. The wounds they've carried for so long can no longer be ignored, forcing both characters to make difficult decisions about forgiveness and family.",
-        "date": "2026-02-17"
+        "date": "2026-02-17",
+        "status": "watched"
       },
       {
         "number": 7,
         "title": "Episode 7",
         "summary": "The culmination of their journey together. Çağla and Doğan must finally face whether the wounds called family can ever truly heal, or if some scars run too deep.",
-        "date": "2026-02-24"
+        "date": "2026-02-24",
+        "status": "watched"
       },
       {
         "number": 8,
         "title": "Episode 8",
-        "summary": "New revelations come to light as Çağla and Doğan navigate the aftermath of their confrontation, discovering that true healing requires more than just understanding—it demands forgiveness and acceptance."
+        "summary": "New revelations come to light as Çağla and Doğan navigate the aftermath of their confrontation, discovering that true healing requires more than just understanding—it demands forgiveness and acceptance.",
+        "date": "2026-03-03",
+        "status": "watched"
+      },
+      {
+        "number": 9,
+        "title": "Episode 9",
+        "summary": "As the dust settles from recent events, new challenges emerge that test the strength of their bond and force them to re-evaluate what truly matters.",
+        "date": "2026-03-11",
+        "status": "upcoming"
       }
     ],
     "videos": [
@@ -220,7 +212,8 @@ const MOVIES_DATA: MovieEntry[] = [
       { "title": "Episode 4", "url": "https://drive.google.com/file/d/1vsNJckTfvIBbb6Nz2YfitMEXYwPcUeUv/view?usp=sharing", "type": "local" },
       { "title": "Episode 5", "url": "https://drive.google.com/file/d/1ACOFv8X12EEtZUBDCa--q0dda15R0Idx/view?usp=sharing", "type": "local" },
       { "title": "Episode 6", "url": "https://drive.google.com/file/d/1Nap6XwDmNv5vH9qlsQNEl9Ee3JutK6c2/view?usp=sharing", "type": "local" },
-      { "title": "Episode 7", "url": "https://drive.google.com/file/d/1V3UHqPG1Lv3t4SUDDrv61uAJ6thmT_7/view?usp=sharing", "type": "local" }
+      { "title": "Episode 7", "url": "https://drive.google.com/file/d/1MlEfhG2BzMPfSWbDaixSV5Tk7OZbFlG4/view?usp=sharing", "type": "local" },
+      { "title": "Episode 8", "url": "https://drive.google.com/file/d/1ImUrQh0LSBmf53k1kql9HkaKaeYFBGox/view?usp=sharing", "type": "local" }
     ]
   },
   {
@@ -284,7 +277,6 @@ const MOVIES_DATA: MovieEntry[] = [
 
 const ENTRIES_STORAGE_KEY = 'movie-night-entries';
 const PROGRESS_STORAGE_KEY = 'movie-night-progress';
-let firebaseHydrated = false;
 
 const getEntriesFromStorage = (): MovieEntry[] | null => {
   try {
@@ -307,114 +299,73 @@ const saveEntriesToStorage = (entries: MovieEntry[]): void => {
 };
 
 export const getEntries = (): MovieEntry[] => {
-  const storedEntries = getEntriesFromStorage();
-  const entries = storedEntries && storedEntries.length > 0 ? [...storedEntries] : [...MOVIES_DATA];
+  const entries = [...MOVIES_DATA];
   const progress = getProgressFromStorage();
-  const ratings = getRatingsFromStorage();
   
   return entries.map(entry => {
-    const storedRating = ratings[entry.id];
-    const normalizedStoredRating = storedRating
-      ? {
-          jojo: typeof storedRating.jojo === 'number' ? storedRating.jojo : 0,
-          dodo: typeof storedRating.dodo === 'number' ? storedRating.dodo : 0,
-        }
-      : undefined;
+    // For TV shows, derive status and date from episodes if available
+    let derivedStatus = entry.status;
+    let derivedDate = entry.date;
 
-    const normalizedEntryRating = entry.ratings
-      ? {
-          jojo: typeof entry.ratings.jojo === 'number' ? entry.ratings.jojo : 0,
-          dodo: typeof entry.ratings.dodo === 'number' ? entry.ratings.dodo : 0,
-        }
-      : undefined;
+    if (entry.type === 'tv' && entry.episodes && entry.episodes.length > 0) {
+      const upcoming = entry.episodes.find(ep => ep.status === 'upcoming');
+      if (upcoming) {
+        derivedStatus = 'upcoming';
+        derivedDate = upcoming.date;
+      } else {
+        derivedStatus = 'watched';
+        // For watched, use the date of the last episode
+        derivedDate = entry.episodes[entry.episodes.length - 1].date;
+      }
+    }
 
     return {
       ...entry,
+      status: derivedStatus,
+      date: derivedDate,
       watchProgress: progress[entry.id] || 0,
-      // Override with stored ratings if available
-      ratings: normalizedStoredRating || normalizedEntryRating
     };
   });
 };
 
 export const getEntriesAsync = async (): Promise<MovieEntry[]> => {
-  await hydrateLocalStorageFromFirebase();
+  const progress = getProgressFromStorage();
 
-  const mergeProgressAndRatings = (entries: MovieEntry[]) => {
-    const progress = getProgressFromStorage();
-    const ratings = getRatingsFromStorage();
+  return [...MOVIES_DATA].map(entry => {
+    // For TV shows, derive status and date from episodes if available
+    let derivedStatus = entry.status;
+    let derivedDate = entry.date;
 
-    return entries.map(entry => {
-      const storedRating = ratings[entry.id];
-      const normalizedStoredRating = storedRating
-        ? {
-            jojo: typeof storedRating.jojo === 'number' ? storedRating.jojo : 0,
-            dodo: typeof storedRating.dodo === 'number' ? storedRating.dodo : 0,
-          }
-        : undefined;
-
-      const normalizedEntryRating = entry.ratings
-        ? {
-            jojo: typeof entry.ratings.jojo === 'number' ? entry.ratings.jojo : 0,
-            dodo: typeof entry.ratings.dodo === 'number' ? entry.ratings.dodo : 0,
-          }
-        : undefined;
-
-      return {
-        ...entry,
-        watchProgress: progress[entry.id] || 0,
-        ratings: normalizedStoredRating || normalizedEntryRating
-      };
-    });
-  };
-
-  // Try to load entries from Firebase first
-  const firebaseEntries = await loadMovieEntries();
-
-  if (firebaseEntries && firebaseEntries.length > 0) {
-    saveEntriesToStorage(firebaseEntries);
-    return mergeProgressAndRatings(firebaseEntries);
-  }
-
-  const storedEntries = getEntriesFromStorage();
-  if (storedEntries && storedEntries.length > 0) {
-    return mergeProgressAndRatings(storedEntries);
-  }
-  
-  // If no Firebase data, migrate hardcoded data to Firebase (one-time)
-  if (MOVIES_DATA.length > 0) {
-    saveEntriesToStorage(MOVIES_DATA);
-    try {
-      await saveMovieEntries(MOVIES_DATA);
-    } catch (error) {
-      console.warn('Firebase seed failed, continuing with local entries:', error);
+    if (entry.type === 'tv' && entry.episodes && entry.episodes.length > 0) {
+      const upcoming = entry.episodes.find(ep => ep.status === 'upcoming');
+      if (upcoming) {
+        derivedStatus = 'upcoming';
+        derivedDate = upcoming.date;
+      } else {
+        derivedStatus = 'watched';
+        derivedDate = entry.episodes[entry.episodes.length - 1].date;
+      }
     }
-  }
-  
-  return getEntries();
+
+    return {
+      ...entry,
+      status: derivedStatus,
+      date: derivedDate,
+      watchProgress: progress[entry.id] || 0,
+    };
+  });
 };
 
 export const saveEntries = async (entries: MovieEntry[]): Promise<void> => {
   saveEntriesToStorage(entries);
-  try {
-    await saveMovieEntries(entries);
-  } catch (error) {
-    console.warn('Failed to save entries to Firebase, kept local copy:', error);
-  }
 };
 
 export const deleteEntry = async (entryId: string): Promise<void> => {
   try {
-    const entries = await getEntriesAsync();
-    const updated = entries.filter(e => e.id !== entryId);
-    await saveEntries(updated);
+    // In manual mode, we don't delete from MOVIES_DATA as it's hardcoded.
+    // We just clean up the local storage for that entry.
     
-    // Also delete relevant stored data for this entry
     try {
-      const ratings = getRatingsFromStorage();
-      delete ratings[entryId];
-      localStorage.setItem(RATING_STORAGE_KEY, JSON.stringify(ratings));
-
       const progress = getProgressFromStorage();
       delete progress[entryId];
       localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(progress));
@@ -429,14 +380,6 @@ export const deleteEntry = async (entryId: string): Promise<void> => {
       const episodeProgress = JSON.parse(localStorage.getItem(EPISODE_PROGRESS_KEY) || '{}');
       delete episodeProgress[entryId];
       localStorage.setItem(EPISODE_PROGRESS_KEY, JSON.stringify(episodeProgress));
-
-      const episodeRatings = JSON.parse(localStorage.getItem(EPISODE_RATING_KEY) || '{}');
-      delete episodeRatings[entryId];
-      localStorage.setItem(EPISODE_RATING_KEY, JSON.stringify(episodeRatings));
-
-      const episodeStatus = JSON.parse(localStorage.getItem(EPISODE_STATUS_KEY) || '{}');
-      delete episodeStatus[entryId];
-      localStorage.setItem(EPISODE_STATUS_KEY, JSON.stringify(episodeStatus));
     } catch (storageError) {
       console.warn('Failed to clean up stored data:', storageError);
     }
@@ -451,11 +394,6 @@ export const saveWatchProgress = (entryId: string, seconds: number): void => {
     const progress = getProgressFromStorage();
     progress[entryId] = seconds;
     localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(progress));
-    
-    // Sync to Firebase in the background
-    firebaseUpdateProgress(entryId, seconds).catch(error => {
-      console.warn('Firebase sync failed, continuing with local storage:', error);
-    });
   } catch (error) {
     console.error('Failed to save watch progress:', error);
   }
@@ -481,173 +419,7 @@ const getProgressFromStorage = (): Record<string, number> => {
   }
 };
 
-const hydrateLocalStorageFromFirebase = async (): Promise<void> => {
-  if (firebaseHydrated) return;
-
-  try {
-    const cloudData = await loadUserProgress();
-    if (!cloudData) {
-      firebaseHydrated = true;
-      return;
-    }
-
-    if (cloudData.watchProgress) {
-      const localProgress = getProgressFromStorage();
-      const mergedProgress = { ...cloudData.watchProgress, ...localProgress };
-      localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(mergedProgress));
-    }
-
-    if (cloudData.ratings) {
-      const localRatings = getRatingsFromStorage();
-      const cloudRatings = Object.fromEntries(
-        Object.entries(cloudData.ratings).map(([entryId, rating]) => [
-          entryId,
-          {
-            jojo: typeof rating?.jojo === 'number' ? rating.jojo : 0,
-            dodo: typeof rating?.dodo === 'number' ? rating.dodo : 0,
-          },
-        ])
-      );
-      const localNormalized = Object.fromEntries(
-        Object.entries(localRatings).map(([entryId, rating]) => [
-          entryId,
-          {
-            jojo: typeof rating?.jojo === 'number' ? rating.jojo : 0,
-            dodo: typeof rating?.dodo === 'number' ? rating.dodo : 0,
-          },
-        ])
-      );
-      const mergedRatings = { ...localNormalized, ...cloudRatings };
-      localStorage.setItem(RATING_STORAGE_KEY, JSON.stringify(mergedRatings));
-    }
-
-    if (cloudData.comments) {
-      const localComments = getCommentsFromStorage();
-      const cloudCommentsFlat: Record<string, CommentMessage[]> = {};
-
-      Object.entries(cloudData.comments).forEach(([entryId, scopes]) => {
-        if (scopes.shared) cloudCommentsFlat[`${entryId}-shared`] = normalizeCommentThread(scopes.shared, 'shared');
-        if (scopes.jojo) cloudCommentsFlat[`${entryId}-jojo`] = normalizeCommentThread(scopes.jojo, 'jojo');
-        if (scopes.dodo) cloudCommentsFlat[`${entryId}-dodo`] = normalizeCommentThread(scopes.dodo, 'dodo');
-      });
-
-      const mergedComments = { ...cloudCommentsFlat, ...localComments };
-      localStorage.setItem(COMMENT_STORAGE_KEY, JSON.stringify(mergedComments));
-    }
-
-    if (cloudData.episodeProgress) {
-      const localEpisodeProgress = getEpisodeProgressFromStorage();
-      const cloudEpisodeProgressFlat: Record<string, number> = {};
-
-      Object.entries(cloudData.episodeProgress).forEach(([entryId, users]) => {
-        if (typeof users.jojo === 'number') cloudEpisodeProgressFlat[`${entryId}-jojo`] = users.jojo;
-        if (typeof users.dodo === 'number') cloudEpisodeProgressFlat[`${entryId}-dodo`] = users.dodo;
-      });
-
-      const mergedEpisodeProgress = { ...cloudEpisodeProgressFlat, ...localEpisodeProgress };
-      localStorage.setItem(EPISODE_PROGRESS_KEY, JSON.stringify(mergedEpisodeProgress));
-    }
-
-    if (cloudData.episodeRatings) {
-      const localEpisodeRatings = getEpisodeRatingsFromStorage();
-      const cloudEpisodeRatingsFlat: Record<string, { jojo: number; dodo: number }> = {};
-
-      Object.entries(cloudData.episodeRatings).forEach(([entryId, episodes]) => {
-        Object.entries(episodes).forEach(([episodeKey, rating]) => {
-          cloudEpisodeRatingsFlat[`${entryId}-${episodeKey}`] = {
-            jojo: rating.jojo || 0,
-            dodo: rating.dodo || 0,
-          };
-        });
-      });
-
-      const mergedEpisodeRatings = { ...cloudEpisodeRatingsFlat, ...localEpisodeRatings };
-      localStorage.setItem(EPISODE_RATING_KEY, JSON.stringify(mergedEpisodeRatings));
-    }
-
-    if (cloudData.episodeStatus) {
-      const localEpisodeStatus = getEpisodeStatusesFromStorage();
-      const cloudEpisodeStatusFlat: Record<string, 'watched' | 'upcoming'> = {};
-
-      Object.entries(cloudData.episodeStatus).forEach(([entryId, episodes]) => {
-        Object.entries(episodes).forEach(([episodeKey, statusByUser]) => {
-          if (statusByUser.jojo) {
-            cloudEpisodeStatusFlat[`${entryId}-${episodeKey}-jojo`] = statusByUser.jojo;
-          }
-          if (statusByUser.dodo) {
-            cloudEpisodeStatusFlat[`${entryId}-${episodeKey}-dodo`] = statusByUser.dodo;
-          }
-        });
-      });
-
-      const mergedEpisodeStatus = { ...cloudEpisodeStatusFlat, ...localEpisodeStatus };
-      localStorage.setItem(EPISODE_STATUS_KEY, JSON.stringify(mergedEpisodeStatus));
-    }
-  } catch (error) {
-    console.warn('Failed to hydrate local data from Firebase:', error);
-  } finally {
-    firebaseHydrated = true;
-  }
-};
-
-// Rating management with Firebase sync
-const RATING_STORAGE_KEY = 'movie-night-ratings';
 const COMMENT_STORAGE_KEY = 'movie-night-comments';
-
-export const saveRating = async (entryId: string, person: 'jojo' | 'dodo', rating: number): Promise<void> => {
-  try {
-    // Save to localStorage first
-    const ratings = getRatingsFromStorage();
-    if (!ratings[entryId]) {
-      ratings[entryId] = { jojo: 0, dodo: 0 };
-    }
-    ratings[entryId][person] = rating;
-    localStorage.setItem(RATING_STORAGE_KEY, JSON.stringify(ratings));
-    
-    // Firebase sync happens automatically when components update ratings
-    await firebaseUpdateRating(entryId, person, rating);
-  } catch (error) {
-    console.warn('Firebase rating sync failed:', error);
-    // Continue even if Firebase fails - ratings are still local
-  }
-};
-
-export const getRating = (entryId: string): { jojo: number; dodo: number } | null => {
-  try {
-    const ratings = getRatingsFromStorage();
-    return ratings[entryId] || null;
-  } catch (error) {
-    console.error('Failed to get rating:', error);
-    return null;
-  }
-};
-
-export const subscribeRatingRealtime = (
-  entryId: string,
-  onUpdate: (rating: { jojo: number; dodo: number }) => void
-): (() => void) => {
-  return firebaseSubscribeSharedRating(entryId, (rating) => {
-    try {
-      const ratings = getRatingsFromStorage();
-      ratings[entryId] = rating;
-      localStorage.setItem(RATING_STORAGE_KEY, JSON.stringify(ratings));
-    } catch (error) {
-      console.warn('Failed to sync realtime rating to local storage:', error);
-    }
-
-    onUpdate(rating);
-  });
-};
-
-const getRatingsFromStorage = (): Record<string, { jojo: number; dodo: number }> => {
-  try {
-    const data = localStorage.getItem(RATING_STORAGE_KEY);
-    return data ? JSON.parse(data) : {};
-  } catch (error) {
-    console.error('Failed to parse ratings:', error);
-    return {};
-  }
-};
 
 export const saveComment = (entryId: string, comment: string, user?: 'jojo' | 'dodo' | null): void => {
   try {
@@ -666,10 +438,6 @@ export const saveComment = (entryId: string, comment: string, user?: 'jojo' | 'd
     const updatedThread = [...thread, nextMessage];
     comments[key] = updatedThread;
     localStorage.setItem(COMMENT_STORAGE_KEY, JSON.stringify(comments));
-
-    firebaseUpdateComment(entryId, scope, updatedThread).catch(error => {
-      console.warn('Firebase comment sync failed, continuing with local storage:', error);
-    });
   } catch (error) {
     console.error('Failed to save comment:', error);
   }
@@ -754,11 +522,6 @@ export const saveEpisodeProgress = (entryId: string, user: 'jojo' | 'dodo', epis
     const key = `${entryId}-${user}`;
     progress[key] = episodeIndex;
     localStorage.setItem(EPISODE_PROGRESS_KEY, JSON.stringify(progress));
-    
-    // Sync to Firebase in the background
-    firebaseUpdateEpisodeProgress(entryId, user, episodeIndex).catch(error => {
-      console.warn('Firebase episode progress sync failed, continuing with local storage:', error);
-    });
   } catch (error) {
     console.error('Failed to save episode progress:', error);
   }
@@ -801,105 +564,4 @@ const getEpisodeProgressFromStorage = (): Record<string, number> => {
     console.error('Failed to parse episode progress:', error);
     return {};
   }
-};
-
-// Episode rating tracking for TV shows
-const EPISODE_RATING_KEY = 'movie-night-episode-ratings';
-
-export const saveEpisodeRating = async (entryId: string, episodeNumber: number, person: 'jojo' | 'dodo', rating: number): Promise<void> => {
-  try {
-    const ratings = getEpisodeRatingsFromStorage();
-    const key = `${entryId}-ep${episodeNumber}`;
-    
-    if (!ratings[key]) {
-      ratings[key] = { jojo: 0, dodo: 0 };
-    }
-    
-    ratings[key][person] = rating;
-    localStorage.setItem(EPISODE_RATING_KEY, JSON.stringify(ratings));
-    
-    // Sync to Firebase in the background
-    firebaseUpdateEpisodeRating(entryId, episodeNumber, person, rating).catch(error => {
-      console.warn('Firebase episode rating sync failed:', error);
-    });
-  } catch (error) {
-    console.error('Failed to save episode rating:', error);
-  }
-};
-
-export const getEpisodeRating = (entryId: string, episodeNumber: number): { jojo: number; dodo: number } => {
-  try {
-    const ratings = getEpisodeRatingsFromStorage();
-    const key = `${entryId}-ep${episodeNumber}`;
-    return ratings[key] || { jojo: 0, dodo: 0 };
-  } catch (error) {
-    console.error('Failed to get episode rating:', error);
-    return { jojo: 0, dodo: 0 };
-  }
-};
-
-const getEpisodeRatingsFromStorage = (): Record<string, { jojo: number; dodo: number }> => {
-  try {
-    const data = localStorage.getItem(EPISODE_RATING_KEY);
-    return data ? JSON.parse(data) : {};
-  } catch (error) {
-    console.error('Failed to parse episode ratings:', error);
-    return {};
-  }
-};
-
-// Episode status tracking for TV shows (per user)
-const EPISODE_STATUS_KEY = 'movie-night-episode-status';
-
-export const saveEpisodeStatus = (entryId: string, episodeNumber: number, user: 'jojo' | 'dodo', status: 'watched' | 'upcoming'): void => {
-  try {
-    const statuses = getEpisodeStatusesFromStorage();
-    const key = `${entryId}-ep${episodeNumber}-${user}`;
-    statuses[key] = status;
-    localStorage.setItem(EPISODE_STATUS_KEY, JSON.stringify(statuses));
-    
-    // Sync to Firebase in background
-    firebaseUpdateEpisodeStatus(entryId, episodeNumber, user, status).catch(err => {
-      console.warn('Firebase sync failed for episode status:', err);
-    });
-  } catch (error) {
-    console.error('Failed to save episode status:', error);
-  }
-};
-
-export const getEpisodeStatus = (entryId: string, episodeNumber: number, user: 'jojo' | 'dodo'): 'watched' | 'upcoming' => {
-  try {
-    const statuses = getEpisodeStatusesFromStorage();
-    const key = `${entryId}-ep${episodeNumber}-${user}`;
-    return statuses[key] || 'upcoming';
-  } catch (error) {
-    console.error('Failed to get episode status:', error);
-    return 'upcoming';
-  }
-};
-
-const getEpisodeStatusesFromStorage = (): Record<string, 'watched' | 'upcoming'> => {
-  try {
-    const data = localStorage.getItem(EPISODE_STATUS_KEY);
-    return data ? JSON.parse(data) : {};
-  } catch (error) {
-    console.error('Failed to parse episode statuses:', error);
-    return {};
-  }
-};
-
-// Initialize episodes 1-7 as watched for both users
-export const initializeEpisodeStatuses = (entryId: string): void => {
-  const statuses = getEpisodeStatusesFromStorage();
-  const users: ('jojo' | 'dodo')[] = ['jojo', 'dodo'];
-  
-  // Force episodes 1-7 to watched
-  for (let ep = 1; ep <= 7; ep++) {
-    users.forEach(user => {
-      const key = `${entryId}-ep${ep}-${user}`;
-      statuses[key] = 'watched';
-    });
-  }
-  
-  localStorage.setItem(EPISODE_STATUS_KEY, JSON.stringify(statuses));
 };

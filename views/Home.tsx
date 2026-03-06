@@ -72,7 +72,6 @@ export const Home = ({ entries, onNavigate, selectedUser }: HomeProps) => {
       .sort((a, b) => {
         if (sort === 'date-desc') return new Date(b.date).getTime() - new Date(a.date).getTime();
         if (sort === 'date-asc') return new Date(a.date).getTime() - new Date(b.date).getTime();
-        if (sort === 'rating-desc') return (b.rating || 0) - (a.rating || 0);
         return 0;
       });
   }, [entries, filter, sort, search]);

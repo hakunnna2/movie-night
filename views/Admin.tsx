@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Edit2, Trash2, Plus, Download, Upload, RefreshCw, Disc3, ExternalLink, LogOut } from 'lucide-react';
 import { MovieEntry } from '../types';
-import { deleteEntry, saveEntries, getEntriesAsync, getRating } from '../services/storage';
+import { deleteEntry, saveEntries, getEntriesAsync } from '../services/storage';
 import { AddEntry } from './AddEntry';
 import { EditEpisodes } from './EditEpisodes';
 
@@ -21,26 +21,19 @@ export const Admin: React.FC<AdminProps> = ({ entries, onBack, onEntriesUpdate, 
   const [sort, setSort] = useState<'date-desc' | 'date-asc' | 'title'>('date-desc');
   const [searchTerm, setSearchTerm] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [entriesWithRatings, setEntriesWithRatings] = useState<MovieEntry[]>([]);
+  const [localEntries, setLocalEntries] = useState<MovieEntry[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load entries with ratings merged in
+  // Load entries
   useEffect(() => {
-    const loadEntriesWithRatings = async () => {
+    const loadEntries = async () => {
       const allEntries = await getEntriesAsync();
-      const mergedEntries = allEntries.map(entry => {
-        const rating = getRating(entry.id);
-        return {
-          ...entry,
-          ratings: rating || entry.ratings
-        };
-      });
-      setEntriesWithRatings(mergedEntries);
+      setLocalEntries(allEntries);
     };
-    loadEntriesWithRatings();
+    loadEntries();
   }, [entries]);
 
-  const filteredEntries = entriesWithRatings
+  const filteredEntries = localEntries
     .filter(e => filter === 'all' || e.status === filter)
     .filter(e => e.title.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => {
@@ -127,25 +120,6 @@ export const Admin: React.FC<AdminProps> = ({ entries, onBack, onEntriesUpdate, 
     setSuccessMessage(message);
     setTimeout(() => setSuccessMessage(''), 3000);
   };
-
-  // Calculate average ratings for JoJo and DoDo
-  const calculateAverages = () => {
-    const watchedEntries = entriesWithRatings.filter(e => e.status === 'watched' && e.ratings);
-    
-    if (watchedEntries.length === 0) {
-      return { jojo: 0, dodo: 0 };
-    }
-
-    const jojoTotal = watchedEntries.reduce((sum, entry) => sum + (entry.ratings?.jojo || 0), 0);
-    const dodoTotal = watchedEntries.reduce((sum, entry) => sum + (entry.ratings?.dodo || 0), 0);
-
-    return {
-      jojo: parseFloat((jojoTotal / watchedEntries.length).toFixed(2)),
-      dodo: parseFloat((dodoTotal / watchedEntries.length).toFixed(2))
-    };
-  };
-
-  const averages = calculateAverages();
 
   if (isAddingEntry || editingEntry) {
     return (
@@ -284,26 +258,18 @@ export const Admin: React.FC<AdminProps> = ({ entries, onBack, onEntriesUpdate, 
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-night-800 border border-night-700 rounded-lg p-4">
             <p className="text-ink-300 text-sm font-bold uppercase">Total Entries</p>
-            <p className="text-3xl font-bold text-popcorn">{entriesWithRatings.length}</p>
+            <p className="text-3xl font-bold text-popcorn">{localEntries.length}</p>
           </div>
           <div className="bg-night-800 border border-night-700 rounded-lg p-4">
             <p className="text-ink-300 text-sm font-bold uppercase">Watched</p>
-            <p className="text-3xl font-bold text-green-400">{entriesWithRatings.filter(e => e.status === 'watched').length}</p>
+            <p className="text-3xl font-bold text-green-400">{localEntries.filter(e => e.status === 'watched').length}</p>
           </div>
           <div className="bg-night-800 border border-night-700 rounded-lg p-4">
             <p className="text-ink-300 text-sm font-bold uppercase">Upcoming</p>
-            <p className="text-3xl font-bold text-purple-400">{entriesWithRatings.filter(e => e.status === 'upcoming').length}</p>
-          </div>
-          <div className="bg-night-800 border border-night-700 rounded-lg p-4">
-            <p className="text-ink-300 text-sm font-bold uppercase">JoJo Average</p>
-            <p className="text-3xl font-bold text-popcorn">{averages.jojo > 0 ? averages.jojo : '—'}</p>
-          </div>
-          <div className="bg-night-800 border border-night-700 rounded-lg p-4">
-            <p className="text-ink-300 text-sm font-bold uppercase">DoDo Average</p>
-            <p className="text-3xl font-bold text-pink-400">{averages.dodo > 0 ? averages.dodo : '—'}</p>
+            <p className="text-3xl font-bold text-purple-400">{localEntries.filter(e => e.status === 'upcoming').length}</p>
           </div>
         </div>
 
@@ -318,7 +284,6 @@ export const Admin: React.FC<AdminProps> = ({ entries, onBack, onEntriesUpdate, 
                   <th className="px-6 py-3 text-left text-xs font-bold text-ink-300 uppercase">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-bold text-ink-300 uppercase">Date</th>
                   <th className="px-6 py-3 text-left text-xs font-bold text-ink-300 uppercase">Duration</th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-ink-300 uppercase">Rating</th>
                   <th className="px-6 py-3 text-left text-xs font-bold text-ink-300 uppercase">Videos</th>
                   <th className="px-6 py-3 text-left text-xs font-bold text-ink-300 uppercase">Actions</th>
                 </tr>
@@ -379,20 +344,6 @@ export const Admin: React.FC<AdminProps> = ({ entries, onBack, onEntriesUpdate, 
                       </td>
                       <td className="px-6 py-4 text-sm text-ink-300">
                         {entry.duration || (entry.episodeRuntimeMinutes ? `${entry.episodeRuntimeMinutes}m/ep` : '—')}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        {entry.ratings ? (
-                          <div className="space-y-1">
-                            <p className="text-popcorn font-semibold">
-                              JoJo: {entry.ratings.jojo || '—'}
-                            </p>
-                            <p className="text-pink-400 font-semibold">
-                              DoDo: {entry.ratings.dodo || '—'}
-                            </p>
-                          </div>
-                        ) : (
-                          <p className="text-ink-400">—</p>
-                        )}
                       </td>
                       <td className="px-6 py-4 text-sm">
                         {entry.videos && entry.videos.length > 0 ? (

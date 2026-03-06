@@ -5,9 +5,8 @@ export interface Episode {
   number: number;
   title: string;
   summary: string;
-  date?: string; // ISO date string when the episode was watched
-  ratings?: DualRating; // Individual ratings for this episode
-  status?: 'watched' | 'upcoming'; // Per-user episode watch status stored separately
+  date: string; // ISO date string when the episode was/will be watched
+  status: 'watched' | 'upcoming'; // Episode status
 }
 
 export interface VideoMedia {
@@ -36,8 +35,6 @@ export interface MovieEntry {
   status: WatchStatus;
   genres?: string[];
   date: string; // ISO string for sorting
-  rating?: number; // 1-5, average rating (for backward compatibility)
-  ratings?: DualRating; // Individual ratings from JoJo and DoDo
   story?: string; // Memory/Story, only for watched
   reason?: string; // Reason to watch, only for upcoming
   posterUrl?: string; // Web URL (https://...) or Local Path (/images/movie.jpg)
@@ -50,7 +47,7 @@ export interface MovieEntry {
   comments?: Comment[]; // Array of comments on the entry
 }
 
-export type SortOption = 'date-desc' | 'date-asc' | 'rating-desc';
+export type SortOption = 'date-desc' | 'date-asc';
 export type FilterType = 'all' | 'movie' | 'tv';
 
 export interface ViewState {

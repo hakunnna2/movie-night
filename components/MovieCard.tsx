@@ -1,7 +1,6 @@
 import { useState, memo, KeyboardEvent } from 'react';
 import { Clock } from 'lucide-react';
 import { MovieEntry } from '../types';
-import { StarRating } from './StarRating';
 import { ImageWithSkeleton } from './ImageWithSkeleton';
 
 interface MovieCardProps {
@@ -28,7 +27,7 @@ export const MovieCard = memo(({ entry, onClick, selectedUser }: MovieCardProps)
     <div 
       role="button"
       tabIndex={0}
-      aria-label={`View details for ${entry.title}, ${entry.type === 'movie' ? 'Movie' : 'TV Show'}, ${isWatched ? `Rated ${entry.rating} out of 5 stars` : 'Not yet watched'}`}
+      aria-label={`View details for ${entry.title}, ${entry.type === 'movie' ? 'Movie' : 'TV Show'}`}
       className="group relative bg-[#1a2332] rounded-2xl overflow-hidden shadow-2xl hover:shadow-glow hover:-translate-y-1 focus:shadow-glow focus:-translate-y-1 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-popcorn focus:ring-offset-2 focus:ring-offset-night-900 transition-all duration-300 cursor-pointer flex flex-col h-full border border-white/5 w-full"
       onClick={onClick}
       onKeyDown={handleKeyPress}
@@ -96,27 +95,6 @@ export const MovieCard = memo(({ entry, onClick, selectedUser }: MovieCardProps)
         </div>
 
         <div className="mt-auto space-y-4">
-          {/* Dual Ratings - Only for Movies (watched), not TV shows */}
-          {isWatched && entry.type === 'movie' && entry.ratings && (
-            <div className="flex gap-2">
-              <div className="flex items-center gap-1 bg-[#fbbf24]/15 px-2.5 py-1 rounded-full">
-                <span className="text-[8px] font-bold text-[#fbbf24]/80">JoJo</span>
-                <span className="text-xs font-black text-[#fbbf24]">{entry.ratings.jojo}</span>
-              </div>
-              <div className="flex items-center gap-1 bg-[#c084fc]/15 px-2.5 py-1 rounded-full">
-                <span className="text-[8px] font-bold text-[#c084fc]/80">DoDo</span>
-                <span className="text-xs font-black text-[#c084fc]">{entry.ratings.dodo}</span>
-              </div>
-            </div>
-          )}
-          
-          {/* Fallback to single rating if dual ratings not available - Movies only */}
-          {isWatched && entry.type === 'movie' && !entry.ratings && entry.rating && (
-            <div className="flex">
-              <StarRating rating={entry.rating} size={14} />
-            </div>
-          )}
-          
           {/* Story Snippet */}
           {displayText && (
             <p className="text-sm text-ink-300 font-hand italic line-clamp-2 leading-relaxed opacity-80 border-l-2 border-white/5 pl-3">
