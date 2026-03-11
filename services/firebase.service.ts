@@ -1,5 +1,5 @@
 import { database } from './firebase.config';
-import { ref, set, get, update, onValue } from 'firebase/database';
+import { ref, set, get, onValue } from 'firebase/database';
 import { MovieEntry } from '../types';
 
 export interface CommentMessage {
@@ -64,12 +64,24 @@ const getDeviceId = (): string => {
 };
 
 const deviceId = getDeviceId();
-const userProgressRef = ref(database, `users/${deviceId}`);
-const sharedMovieEntriesRef = ref(database, 'shared/movieEntries');
-const sharedRatingsRef = ref(database, 'shared/ratings');
+
+const getDbRef = (path: string) => {
+  if (!database) return null;
+  return ref(database, path);
+};
+
+const logFirebaseUnavailable = (context: string): void => {
+  console.warn(`${context}: Firebase Realtime Database is not configured.`);
+};
 
 // Save user progress to Firebase
 export const saveUserProgress = async (progress: UserProgress): Promise<void> => {
+  const userProgressRef = getDbRef(`users/${deviceId}`);
+  if (!userProgressRef) {
+    logFirebaseUnavailable('saveUserProgress');
+    return;
+  }
+
   try {
     await set(userProgressRef, progress);
   } catch (error) {
@@ -80,6 +92,13 @@ export const saveUserProgress = async (progress: UserProgress): Promise<void> =>
 
 // Load user progress from Firebase
 export const loadUserProgress = async (): Promise<UserProgress | null> => {
+  const userProgressRef = getDbRef(`users/${deviceId}`);
+  const sharedRatingsRef = getDbRef('shared/ratings');
+  if (!userProgressRef || !sharedRatingsRef) {
+    logFirebaseUnavailable('loadUserProgress');
+    return null;
+  }
+
   try {
     const snapshot = await get(userProgressRef);
     const baseProgress = snapshot.exists() ? (snapshot.val() as UserProgress) : {};
@@ -94,7 +113,10 @@ export const loadUserProgress = async (): Promise<UserProgress | null> => {
     }
 
     // Fallback/migration from older per-device ratings path.
-    const legacyRatingsRef = ref(database, `users/${deviceId}/ratings`);
+    const legacyRatingsRef = getDbRef(`users/${deviceId}/ratings`);
+    if (!legacyRatingsRef) {
+      return Object.keys(baseProgress).length > 0 ? baseProgress : null;
+    }
     const legacyRatingsSnapshot = await get(legacyRatingsRef);
     if (legacyRatingsSnapshot.exists()) {
       const legacyRatings = legacyRatingsSnapshot.val() as UserProgress['ratings'];
@@ -118,8 +140,13 @@ export const loadUserProgress = async (): Promise<UserProgress | null> => {
 
 // Update specific rating (JoJo or DoDo)
 export const updateRating = async (movieId: string, person: 'jojo' | 'dodo', rating: number): Promise<void> => {
+  const ratingRef = getDbRef(`shared/ratings/${movieId}/${person}`);
+  if (!ratingRef) {
+    logFirebaseUnavailable('updateRating');
+    return;
+  }
+
   try {
-    const ratingRef = ref(database, `shared/ratings/${movieId}/${person}`);
     await set(ratingRef, rating);
   } catch (error) {
     // Firebase database might not be enabled, but continue gracefully
@@ -136,8 +163,14 @@ export const subscribeSharedRating = (
   movieId: string,
   onUpdate: (rating: { jojo: number; dodo: number }) => void
 ): (() => void) => {
+  const ratingRef = getDbRef(`shared/ratings/${movieId}`);
+  if (!ratingRef) {
+    logFirebaseUnavailable('subscribeSharedRating');
+    onUpdate({ jojo: 0, dodo: 0 });
+    return () => {};
+  }
+
   try {
-    const ratingRef = ref(database, `shared/ratings/${movieId}`);
     const unsubscribe = onValue(
       ratingRef,
       (snapshot) => {
@@ -161,8 +194,13 @@ export const subscribeSharedRating = (
 
 // Update watch progress
 export const updateWatchProgress = async (movieId: string, progress: number): Promise<void> => {
+  const progressRef = getDbRef(`users/${deviceId}/watchProgress/${movieId}`);
+  if (!progressRef) {
+    logFirebaseUnavailable('updateWatchProgress');
+    return;
+  }
+
   try {
-    const progressRef = ref(database, `users/${deviceId}/watchProgress/${movieId}`);
     await set(progressRef, progress);
   } catch (error) {
     // Firebase not available - continue gracefully
@@ -172,8 +210,13 @@ export const updateWatchProgress = async (movieId: string, progress: number): Pr
 
 // Update watch status
 export const updateWatchStatus = async (movieId: string, isWatched: boolean): Promise<void> => {
+  const statusRef = getDbRef(`users/${deviceId}/watchStatus/${movieId}`);
+  if (!statusRef) {
+    logFirebaseUnavailable('updateWatchStatus');
+    return;
+  }
+
   try {
-    const statusRef = ref(database, `users/${deviceId}/watchStatus/${movieId}`);
     await set(statusRef, isWatched);
   } catch (error) {
     // Firebase not available - continue gracefully
@@ -183,8 +226,13 @@ export const updateWatchStatus = async (movieId: string, isWatched: boolean): Pr
 
 // Update episode progress for TV shows (per user)
 export const updateEpisodeProgress = async (movieId: string, user: 'jojo' | 'dodo', episodeIndex: number): Promise<void> => {
+  const episodeRef = getDbRef(`users/${deviceId}/episodeProgress/${movieId}/${user}`);
+  if (!episodeRef) {
+    logFirebaseUnavailable('updateEpisodeProgress');
+    return;
+  }
+
   try {
-    const episodeRef = ref(database, `users/${deviceId}/episodeProgress/${movieId}/${user}`);
     await set(episodeRef, episodeIndex);
   } catch (error) {
     // Firebase not available - continue gracefully
@@ -194,8 +242,13 @@ export const updateEpisodeProgress = async (movieId: string, user: 'jojo' | 'dod
 
 // Update episode rating for TV shows
 export const updateEpisodeRating = async (movieId: string, episodeNumber: number, user: 'jojo' | 'dodo', rating: number): Promise<void> => {
+  const episodeRatingRef = getDbRef(`users/${deviceId}/episodeRatings/${movieId}/ep${episodeNumber}/${user}`);
+  if (!episodeRatingRef) {
+    logFirebaseUnavailable('updateEpisodeRating');
+    return;
+  }
+
   try {
-    const episodeRatingRef = ref(database, `users/${deviceId}/episodeRatings/${movieId}/ep${episodeNumber}/${user}`);
     await set(episodeRatingRef, rating);
   } catch (error) {
     // Firebase not available - continue gracefully
@@ -205,8 +258,13 @@ export const updateEpisodeRating = async (movieId: string, episodeNumber: number
 
 // Update episode status for TV shows (watched/upcoming)
 export const updateEpisodeStatus = async (movieId: string, episodeNumber: number, user: 'jojo' | 'dodo', status: 'watched' | 'upcoming'): Promise<void> => {
+  const episodeStatusRef = getDbRef(`users/${deviceId}/episodeStatus/${movieId}/ep${episodeNumber}/${user}`);
+  if (!episodeStatusRef) {
+    logFirebaseUnavailable('updateEpisodeStatus');
+    return;
+  }
+
   try {
-    const episodeStatusRef = ref(database, `users/${deviceId}/episodeStatus/${movieId}/ep${episodeNumber}/${user}`);
     await set(episodeStatusRef, status);
   } catch (error) {
     // Firebase not available - continue gracefully
@@ -216,8 +274,13 @@ export const updateEpisodeStatus = async (movieId: string, episodeNumber: number
 
 // Update comment thread for movie/series (shared or per user)
 export const updateComment = async (movieId: string, scope: 'shared' | 'jojo' | 'dodo', comments: CommentMessage[]): Promise<void> => {
+  const commentRef = getDbRef(`users/${deviceId}/comments/${movieId}/${scope}`);
+  if (!commentRef) {
+    logFirebaseUnavailable('updateComment');
+    return;
+  }
+
   try {
-    const commentRef = ref(database, `users/${deviceId}/comments/${movieId}/${scope}`);
     await set(commentRef, comments);
   } catch (error) {
     console.warn('Error updating comment (Firebase may not be enabled):', error);
@@ -226,6 +289,12 @@ export const updateComment = async (movieId: string, scope: 'shared' | 'jojo' | 
 
 // Save movie entries to Firebase
 export const saveMovieEntries = async (entries: MovieEntry[]): Promise<void> => {
+  const sharedMovieEntriesRef = getDbRef('shared/movieEntries');
+  if (!sharedMovieEntriesRef) {
+    logFirebaseUnavailable('saveMovieEntries');
+    return;
+  }
+
   try {
     await set(sharedMovieEntriesRef, entries);
   } catch (error) {
@@ -236,6 +305,12 @@ export const saveMovieEntries = async (entries: MovieEntry[]): Promise<void> => 
 
 // Load movie entries from Firebase
 export const loadMovieEntries = async (): Promise<MovieEntry[] | null> => {
+  const sharedMovieEntriesRef = getDbRef('shared/movieEntries');
+  if (!sharedMovieEntriesRef) {
+    logFirebaseUnavailable('loadMovieEntries');
+    return null;
+  }
+
   try {
     const snapshot = await get(sharedMovieEntriesRef);
     if (snapshot.exists()) {
@@ -243,7 +318,10 @@ export const loadMovieEntries = async (): Promise<MovieEntry[] | null> => {
     }
 
     // Fallback for older data that was saved per-device before shared entries existed.
-    const legacyEntriesRef = ref(database, `users/${deviceId}/movieEntries`);
+    const legacyEntriesRef = getDbRef(`users/${deviceId}/movieEntries`);
+    if (!legacyEntriesRef) {
+      return null;
+    }
     const legacySnapshot = await get(legacyEntriesRef);
     if (legacySnapshot.exists()) {
       const legacyEntries = legacySnapshot.val() as MovieEntry[];

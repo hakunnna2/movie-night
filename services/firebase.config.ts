@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getDatabase } from 'firebase/database';
+import { getDatabase, type Database } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -11,5 +11,22 @@ const firebaseConfig = {
   databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
 };
 
-const app = initializeApp(firebaseConfig);
-export const database = getDatabase(app);
+const hasRequiredFirebaseConfig =
+  Boolean(firebaseConfig.projectId) && Boolean(firebaseConfig.databaseURL);
+
+let database: Database | null = null;
+
+if (!hasRequiredFirebaseConfig) {
+  console.warn(
+    '[firebase] Missing VITE_FIREBASE_PROJECT_ID or VITE_FIREBASE_DATABASE_URL. Realtime sync is disabled.'
+  );
+} else {
+  try {
+    const app = initializeApp(firebaseConfig);
+    database = getDatabase(app);
+  } catch (error) {
+    console.warn('[firebase] Failed to initialize Firebase. Realtime sync is disabled.', error);
+  }
+}
+
+export { database };
