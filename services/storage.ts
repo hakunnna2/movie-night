@@ -213,8 +213,9 @@ const MOVIES_DATA: MovieEntry[] = [
       { "title": "Episode 4", "url": "https://drive.google.com/file/d/1vsNJckTfvIBbb6Nz2YfitMEXYwPcUeUv/view?usp=sharing", "type": "local" },
       { "title": "Episode 5", "url": "https://drive.google.com/file/d/1ACOFv8X12EEtZUBDCa--q0dda15R0Idx/view?usp=sharing", "type": "local" },
       { "title": "Episode 6", "url": "https://drive.google.com/file/d/1Nap6XwDmNv5vH9qlsQNEl9Ee3JutK6c2/view?usp=sharing", "type": "local" },
-      { "title": "Episode 7", "url": "https://drive.google.com/file/d/1MlEfhG2BzMPfSWbDaixSV5Tk7OZbFlG4/view?usp=sharing", "type": "local" },
-      { "title": "Episode 8", "url": "https://drive.google.com/file/d/1ImUrQh0LSBmf53k1kql9HkaKaeYFBGox/view?usp=sharing", "type": "local" }
+      { "title": "Episode 7", "url": "https://drive.google.com/file/d/1V3UHqPG1Lv3t4SUDDrDv61uAJ6thmT_7/view?usp=sharing", "type": "local" },
+      { "title": "Episode 8", "url": "https://drive.google.com/file/d/1ImUrQh0LSBmf53k1kql9HkaKaeYFBGox/view?usp=sharing", "type": "local" },
+      { "title": "Episode 9", "url": "https://drive.google.com/file/d/1jDR-clpsNmgr9YZMznS9PWYwlU_xl8Y8/view?usp=sharing", "type": "local" }
     ]
   },
   {

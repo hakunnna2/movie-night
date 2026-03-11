@@ -261,3 +261,15 @@ export const loadMovieEntries = async (): Promise<MovieEntry[] | null> => {
     return null;
   }
 };
+
+export const addMovieEntryToFirebase = async (entry: MovieEntry): Promise<void> => {
+  try {
+    const currentEntries = await loadMovieEntries() || [];
+    currentEntries.push(entry);
+    await saveMovieEntries(currentEntries);
+  } catch (error) {
+    console.warn('Error adding movie entry to Firebase:', error);
+    throw error;
+  }
+};
+
