@@ -203,7 +203,7 @@ const MOVIES_DATA: MovieEntry[] = [
         "title": "Episode 9",
         "summary": "As the dust settles from recent events, new challenges emerge that test the strength of their bond and force them to re-evaluate what truly matters.",
         "date": "2026-03-11",
-        "status": "upcoming"
+        "status": "watched"
       }
     ],
     "videos": [
