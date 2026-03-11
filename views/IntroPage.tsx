@@ -11,8 +11,8 @@ interface IntroPageProps {
 
 // User credentials loaded from environment variables
 const ADMIN_USERS: Record<string, string> = {
-  jojo: import.meta.env.VITE_JOJO_PIN || '',
-  dodo: import.meta.env.VITE_DODO_PIN || '',
+  jojo: (import.meta.env.VITE_JOJO_PIN || '2004').trim(),
+  dodo: (import.meta.env.VITE_DODO_PIN || 'LUPIN').trim(),
 };
 
 export const IntroPage = ({ entries, onContinue, selectedUser, onSelectUser }: IntroPageProps) => {
@@ -30,8 +30,9 @@ export const IntroPage = ({ entries, onContinue, selectedUser, onSelectUser }: I
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const normalizedPassword = password.trim();
     
-    if (authenticatingUser && ADMIN_USERS[authenticatingUser] === password) {
+    if (authenticatingUser && ADMIN_USERS[authenticatingUser] === normalizedPassword) {
       // Authentication successful
       onSelectUser(authenticatingUser);
       setShowUserSelector(false);
