@@ -134,7 +134,7 @@ const MOVIES_DATA: MovieEntry[] = [
     "status": "upcoming",
     "date": "2026-03-11",
     "genres": ["Drama", "Family", "Psychological"],
-    "duration": "Weekly Series • 9 Episodes Total",
+    "duration": "Weekly Series • 10 Episodes Total",
     "episodeRuntimeMinutes": 190,
     "story": "The Turkish series Abi (My Brother) revolves around the idea that family is a true test. It follows the story of Çağla, a lawyer who was pushed into her profession by the harshness of life and the absence of a real family. On the other side stands Doğan, a man from a large and wealthy family who ran away in an attempt to escape a past filled with secrets. But life forces a confrontation, and the doors to a deep relationship open, where each of them carries postponed wounds—wounds they can neither open nor close… wounds called family. New episodes air weekly.",
     "posterUrl": "/assets/ABIM/abi.png",
@@ -204,6 +204,13 @@ const MOVIES_DATA: MovieEntry[] = [
         "summary": "As the dust settles from recent events, new challenges emerge that test the strength of their bond and force them to re-evaluate what truly matters.",
         "date": "2026-03-11",
         "status": "watched"
+      },
+      {
+        "number": 10,
+        "title": "Episode 10",
+        "summary": "The next chapter in the unfolding story.",
+        "date": "2026-03-18",
+        "status": "watched"
       }
     ],
     "videos": [
@@ -215,7 +222,8 @@ const MOVIES_DATA: MovieEntry[] = [
       { "title": "Episode 6", "url": "https://drive.google.com/file/d/1Nap6XwDmNv5vH9qlsQNEl9Ee3JutK6c2/view?usp=sharing", "type": "local" },
       { "title": "Episode 7", "url": "https://drive.google.com/file/d/1V3UHqPG1Lv3t4SUDDrDv61uAJ6thmT_7/view?usp=sharing", "type": "local" },
       { "title": "Episode 8", "url": "https://drive.google.com/file/d/1ImUrQh0LSBmf53k1kql9HkaKaeYFBGox/view?usp=sharing", "type": "local" },
-      { "title": "Episode 9", "url": "https://drive.google.com/file/d/1jDR-clpsNmgr9YZMznS9PWYwlU_xl8Y8/view?usp=sharing", "type": "local" }
+      { "title": "Episode 9", "url": "https://drive.google.com/file/d/1jDR-clpsNmgr9YZMznS9PWYwlU_xl8Y8/view?usp=sharing", "type": "local" },
+      { "title": "Episode 10", "url": "https://drive.google.com/file/d/1XzY9v5v5v5v5v5v5v5v5v5v5v5v5v5v/view?usp=sharing    ", "type": "local" }
     ]
   },
   {
