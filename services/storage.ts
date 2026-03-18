@@ -208,7 +208,7 @@ const MOVIES_DATA: MovieEntry[] = [
       {
         "number": 10,
         "title": "Episode 10",
-        "summary": "The next chapter in the unfolding story.",
+        "summary": "As Çağla and Doğan prepare to face the consequences of their recent revelations, old family wounds resurface and threaten to tear them apart. They must make a definitive choice about where their loyalties lie before their shared past destroys their fragile future.",
         "date": "2026-03-18",
         "status": "watched"
       }
@@ -223,7 +223,7 @@ const MOVIES_DATA: MovieEntry[] = [
       { "title": "Episode 7", "url": "https://drive.google.com/file/d/1V3UHqPG1Lv3t4SUDDrDv61uAJ6thmT_7/view?usp=sharing", "type": "local" },
       { "title": "Episode 8", "url": "https://drive.google.com/file/d/1ImUrQh0LSBmf53k1kql9HkaKaeYFBGox/view?usp=sharing", "type": "local" },
       { "title": "Episode 9", "url": "https://drive.google.com/file/d/1jDR-clpsNmgr9YZMznS9PWYwlU_xl8Y8/view?usp=sharing", "type": "local" },
-      { "title": "Episode 10", "url": "https://drive.google.com/file/d/1XzY9v5v5v5v5v5v5v5v5v5v5v5v5v5v/view?usp=sharing    ", "type": "local" }
+      { "title": "Episode 10", "url": "https://drive.google.com/file/d/1XzY9v5v5v5v5v5v5v5v5v5v5v5v5v5v/view?usp=sharing  ", "type": "local" }
     ]
   },
   {
