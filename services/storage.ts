@@ -223,7 +223,7 @@ const MOVIES_DATA: MovieEntry[] = [
       { "title": "Episode 7", "url": "https://drive.google.com/file/d/1V3UHqPG1Lv3t4SUDDrDv61uAJ6thmT_7/view?usp=sharing", "type": "local" },
       { "title": "Episode 8", "url": "https://drive.google.com/file/d/1ImUrQh0LSBmf53k1kql9HkaKaeYFBGox/view?usp=sharing", "type": "local" },
       { "title": "Episode 9", "url": "https://drive.google.com/file/d/1jDR-clpsNmgr9YZMznS9PWYwlU_xl8Y8/view?usp=sharing", "type": "local" },
-      { "title": "Episode 10", "url": "https://drive.google.com/file/d/1XzY9v5v5v5v5v5v5v5v5v5v5v5v5v5v/view?usp=sharing  ", "type": "local" }
+      { "title": "Episode 10", "url": "https://drive.google.com/file/d/10FQuy9OUhpng6xoxn30hZv0vl25o08li/view?usp=sharing", "type": "local" }
     ]
   },
   {
