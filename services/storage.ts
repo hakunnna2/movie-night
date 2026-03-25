@@ -134,7 +134,7 @@ const MOVIES_DATA: MovieEntry[] = [
     "status": "upcoming",
     "date": "2026-03-11",
     "genres": ["Drama", "Family", "Psychological"],
-    "duration": "Weekly Series • 10 Episodes Total",
+    "duration": "Weekly Series • 11 Episodes Total",
     "episodeRuntimeMinutes": 190,
     "story": "The Turkish series Abi (My Brother) revolves around the idea that family is a true test. It follows the story of Çağla, a lawyer who was pushed into her profession by the harshness of life and the absence of a real family. On the other side stands Doğan, a man from a large and wealthy family who ran away in an attempt to escape a past filled with secrets. But life forces a confrontation, and the doors to a deep relationship open, where each of them carries postponed wounds—wounds they can neither open nor close… wounds called family. New episodes air weekly.",
     "posterUrl": "/assets/ABIM/abi.png",
@@ -211,6 +211,13 @@ const MOVIES_DATA: MovieEntry[] = [
         "summary": "As Çağla and Doğan prepare to face the consequences of their recent revelations, old family wounds resurface and threaten to tear them apart. They must make a definitive choice about where their loyalties lie before their shared past destroys their fragile future.",
         "date": "2026-03-18",
         "status": "watched"
+      },
+      {
+        "number": 11,
+        "title": "Episode 11",
+        "summary": "After everything comes to a head, Çağla and Doğan are forced to rebuild trust from the ground up. With family pressure mounting from every side, they realize that choosing each other means confronting the truths they spent years avoiding.",
+        "date": "2026-03-25",
+        "status": "watched"
       }
     ],
     "videos": [
@@ -223,7 +230,8 @@ const MOVIES_DATA: MovieEntry[] = [
       { "title": "Episode 7", "url": "https://drive.google.com/file/d/1V3UHqPG1Lv3t4SUDDrDv61uAJ6thmT_7/view?usp=sharing", "type": "local" },
       { "title": "Episode 8", "url": "https://drive.google.com/file/d/1ImUrQh0LSBmf53k1kql9HkaKaeYFBGox/view?usp=sharing", "type": "local" },
       { "title": "Episode 9", "url": "https://drive.google.com/file/d/1jDR-clpsNmgr9YZMznS9PWYwlU_xl8Y8/view?usp=sharing", "type": "local" },
-      { "title": "Episode 10", "url": "https://drive.google.com/file/d/10FQuy9OUhpng6xoxn30hZv0vl25o08li/view?usp=sharing", "type": "local" }
+      { "title": "Episode 10", "url": "https://drive.google.com/file/d/10FQuy9OUhpng6xoxn30hZv0vl25o08li/view?usp=sharing", "type": "local" },
+      { "title": "Episode 11", "url": "https://drive.google.com/file/d/1eWkX7duilKn2SS-u719xJzJyptK293Nl/view?usp=sharing", "type": "local" }
     ]
   },
   {
