@@ -290,6 +290,36 @@ const MOVIES_DATA: MovieEntry[] = [
     "videos": [
       { "title": "Movie", "url": "https://drive.google.com/file/d/1bdEHEaiTUTkIjpMOaHVC6dd4EB8PbLn9/view?usp=sharing", "type": "local" }
     ]
+  },
+  {
+    "id": "12",
+    "title": "Breaking Down And Reassembling A Boeing 747",
+    "type": "movie",
+    "status": "upcoming",
+    "date": "2026-03-27",
+    "genres": ["Documentary", "Aviation"],
+    "duration": "59m",
+    "story": "A behind-the-scenes documentary that follows the full teardown and rebuild process of a Boeing 747, from engineering logistics to final assembly.",
+    "posterUrl": "/assets/Boeing 747/Boeing 747.jpg",
+    "captures": ["/assets/Boeing 747/Boeing 747.jpg"],
+    "videos": [
+      { "title": "Movie", "url": "https://drive.google.com/file/d/1NWoPoH3Y0Jmlg54NNNgLriOQRq-gLbgz/view?usp=sharing", "type": "local" }
+    ]
+  },
+  {
+    "id": "13",
+    "title": "Manufacturing an Airbus A350",
+    "type": "movie",
+    "status": "upcoming",
+    "date": "2026-03-27",
+    "genres": ["Documentary", "Aviation"],
+    "duration": "49 min",
+    "story": "A documentary focused on the engineering and production process behind the Airbus A350, from structural assembly to final delivery.",
+      "posterUrl": "/assets/a350/a350.webp",
+      "captures": ["/assets/a350/a350.webp"],
+      "videos": [
+        { "title": "Movie", "url": "https://drive.google.com/file/d/1zuZdagxuXtKzFLi-dqZUWzQrq8RoGOso/view?usp=sharing", "type": "local" }
+      ],
   }
 ];
 

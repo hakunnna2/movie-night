@@ -50,7 +50,7 @@ export interface MovieEntry {
 }
 
 export type SortOption = 'date-desc' | 'date-asc';
-export type FilterType = 'all' | 'movie' | 'tv';
+export type FilterType = 'all' | 'movie' | 'tv' | 'documentary';
 
 export interface ViewState {
   current: 'home' | 'details';

@@ -8,14 +8,28 @@ interface FilterBarProps {
 }
 
 export const FilterBar = ({ filter, setFilter, sort, setSort }: FilterBarProps) => {
+  const getFilterLabel = (value: FilterType) => {
+    if (value === 'all') return 'All';
+    if (value === 'movie') return 'Movies';
+    if (value === 'tv') return 'TV Shows';
+    return 'Documentary';
+  };
+
+  const getFilterAriaLabel = (value: FilterType) => {
+    if (value === 'all') return 'Filter by all content';
+    if (value === 'movie') return 'Filter by movies only';
+    if (value === 'tv') return 'Filter by TV shows only';
+    return 'Filter by documentary titles only';
+  };
+
   return (
     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8 bg-night-800/50 p-2 rounded-2xl border border-night-700/50">
       <div className="flex gap-1" role="group" aria-label="Filter movies and TV shows">
-        {(['all', 'movie', 'tv'] as FilterType[]).map((f) => (
+        {(['all', 'movie', 'tv', 'documentary'] as FilterType[]).map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
-            aria-label={`Filter by ${f === 'all' ? 'all content' : f === 'movie' ? 'movies only' : 'TV shows only'}`}
+            aria-label={getFilterAriaLabel(f)}
             aria-pressed={filter === f}
             className={`px-4 py-3 min-h-[44px] rounded-xl text-sm font-bold transition-all duration-300 capitalize focus:outline-none focus:ring-2 focus:ring-popcorn/50 active:scale-95 ${
               filter === f 
@@ -23,7 +37,7 @@ export const FilterBar = ({ filter, setFilter, sort, setSort }: FilterBarProps) 
                 : 'text-ink-300 hover:text-ink-100 hover:bg-night-800'
             }`}
           >
-            {f === 'all' ? 'All' : f === 'movie' ? 'Movies' : 'TV Shows'}
+            {getFilterLabel(f)}
           </button>
         ))}
       </div>

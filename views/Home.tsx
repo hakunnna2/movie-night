@@ -61,7 +61,13 @@ export const Home = ({ entries, onNavigate, selectedUser }: HomeProps) => {
     const searchLower = search.toLowerCase();
     return entries
       .filter(e => e.status === status)
-      .filter(e => filter === 'all' || e.type === filter)
+      .filter(e => {
+        if (filter === 'all') return true;
+        if (filter === 'documentary') {
+          return e.genres?.some((g) => g.toLowerCase().includes('documentary')) ?? false;
+        }
+        return e.type === filter;
+      })
       .filter(e => {
         if (!search.trim()) return true;
         return e.title.toLowerCase().includes(searchLower) ||
