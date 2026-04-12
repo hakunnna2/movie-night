@@ -1,4 +1,4 @@
-import { useState, memo, KeyboardEvent } from 'react';
+import { useState, memo } from 'react';
 import { Clock } from 'lucide-react';
 import { MovieEntry } from '../types';
 import { ImageWithSkeleton } from './ImageWithSkeleton';
@@ -16,21 +16,12 @@ export const MovieCard = memo(({ entry, onClick, selectedUser }: MovieCardProps)
   const displayText = entry.story || entry.reason;
   const captureImage = entry.captures?.[0] || entry.posterUrl;
 
-  const handleKeyPress = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onClick();
-    }
-  };
-
   return (
-    <div 
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
       aria-label={`View details for ${entry.title}, ${entry.type === 'movie' ? 'Movie' : 'TV Show'}`}
-      className="group relative bg-[#1a2332] rounded-2xl overflow-hidden shadow-2xl hover:shadow-glow hover:-translate-y-1 focus:shadow-glow focus:-translate-y-1 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-popcorn focus:ring-offset-2 focus:ring-offset-night-900 transition-all duration-300 cursor-pointer flex flex-col h-full border border-white/5 w-full"
+      className="group relative bg-[#1a2332] rounded-2xl overflow-hidden shadow-2xl hover:shadow-glow hover:-translate-y-1 focus:shadow-glow focus:-translate-y-1 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-popcorn focus:ring-offset-2 focus:ring-offset-night-900 transition-all duration-300 cursor-pointer flex flex-col h-full border border-white/5 w-full text-left"
       onClick={onClick}
-      onKeyDown={handleKeyPress}
     >
       {/* Header Section: Poster + Capture */}
       <div className="relative h-44 w-full bg-[#0f172a] overflow-hidden flex">
@@ -103,6 +94,6 @@ export const MovieCard = memo(({ entry, onClick, selectedUser }: MovieCardProps)
           )}
         </div>
       </div>
-    </div>
+    </button>
   );
 });

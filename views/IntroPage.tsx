@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { MovieEntry } from '../types';
 import { ArrowRight, Eye, EyeOff, Lock } from 'lucide-react';
+import { calculateIntroStats } from '../utils/introStats';
 
 interface IntroPageProps {
   entries: MovieEntry[];
@@ -11,8 +12,8 @@ interface IntroPageProps {
 
 // User credentials loaded from environment variables
 const ADMIN_USERS: Record<string, string> = {
-  jojo: (import.meta.env.VITE_JOJO_PIN || '2004').trim(),
-  dodo: (import.meta.env.VITE_DODO_PIN || 'LUPIN').trim(),
+  jojo: (import.meta.env.VITE_JOJO_PIN || '').trim(),
+  dodo: (import.meta.env.VITE_DODO_PIN || '').trim(),
 };
 
 export const IntroPage = ({ entries, onContinue, selectedUser, onSelectUser }: IntroPageProps) => {
@@ -23,6 +24,19 @@ export const IntroPage = ({ entries, onContinue, selectedUser, onSelectUser }: I
   const [authError, setAuthError] = useState('');
 
   const handleUserClick = (user: 'jojo' | 'dodo') => {
+    const userPin = ADMIN_USERS[user];
+
+    // If PIN is not configured, allow access instead of blocking the app.
+    if (!userPin) {
+      onSelectUser(user);
+      setShowUserSelector(false);
+      setAuthenticatingUser(null);
+      setPassword('');
+      setAuthError('');
+      onContinue();
+      return;
+    }
+
     setAuthenticatingUser(user);
     setPassword('');
     setAuthError('');
@@ -31,8 +45,14 @@ export const IntroPage = ({ entries, onContinue, selectedUser, onSelectUser }: I
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const normalizedPassword = password.trim();
+    const expectedPassword = authenticatingUser ? ADMIN_USERS[authenticatingUser] : '';
+
+    if (!expectedPassword) {
+      setAuthError('User PIN is not configured. Set VITE_JOJO_PIN and VITE_DODO_PIN in your environment.');
+      return;
+    }
     
-    if (authenticatingUser && ADMIN_USERS[authenticatingUser] === normalizedPassword) {
+    if (authenticatingUser && expectedPassword === normalizedPassword) {
       // Authentication successful
       onSelectUser(authenticatingUser);
       setShowUserSelector(false);
@@ -53,93 +73,7 @@ export const IntroPage = ({ entries, onContinue, selectedUser, onSelectUser }: I
     setAuthError('');
   };
 
-  // Calculate time together
-  const timeTogether = useMemo(() => {
-    const parseMovieMinutes = (duration: string): number => {
-      const fullMatch = duration.match(/(\d+)h\s*(\d+)m/i);
-      if (fullMatch) {
-        const hours = parseInt(fullMatch[1], 10);
-        const minutes = parseInt(fullMatch[2], 10);
-        return hours * 60 + minutes;
-      }
-
-      const hoursOnlyMatch = duration.match(/(\d+)h/i);
-      if (hoursOnlyMatch) {
-        return parseInt(hoursOnlyMatch[1], 10) * 60;
-      }
-
-      const minutesOnlyMatch = duration.match(/(\d+)m/i);
-      if (minutesOnlyMatch) {
-        return parseInt(minutesOnlyMatch[1], 10);
-      }
-
-      return 0;
-    };
-
-    const getEpisodeCountFromDuration = (duration?: string): number => {
-      if (!duration) return 0;
-      const match = duration.match(/(\d+)\s*Episodes?/i);
-      return match ? parseInt(match[1], 10) : 0;
-    };
-
-    const watched = entries.filter(e => e.status === 'watched');
-    
-    let totalMinutes = 0;
-    const genreMap: Record<string, number> = {};
-    let watchedTvEpisodeCount = 0;
-    let earliestDate = new Date();
-    let latestDate = new Date('2000-01-01');
-
-    // Also count episodes from "upcoming" shows that are marked as "watched"
-    const allEntries = entries;
-    
-    allEntries.forEach(entry => {
-      if (entry.status === 'watched' && entry.type === 'movie' && entry.duration) {
-        totalMinutes += parseMovieMinutes(entry.duration);
-      }
-
-      if (entry.type === 'tv' && entry.episodeRuntimeMinutes) {
-        let watchedEpisodes = 0;
-
-        if (entry.episodes?.length) {
-          watchedEpisodes = entry.episodes.filter(episode =>
-            episode.status === 'watched'
-          ).length;
-        }
-
-        if (watchedEpisodes === 0 && entry.status === 'watched') {
-          const fromEpisodes = entry.episodes?.length || 0;
-          const fromVideos = entry.videos?.length || 0;
-          const fromDuration = getEpisodeCountFromDuration(entry.duration);
-          watchedEpisodes = fromEpisodes || fromVideos || fromDuration;
-        }
-
-        watchedTvEpisodeCount += watchedEpisodes;
-        totalMinutes += watchedEpisodes * entry.episodeRuntimeMinutes;
-      }
-
-      if (entry.status === 'watched') {
-        entry.genres?.forEach(genre => {
-          genreMap[genre] = (genreMap[genre] || 0) + 1;
-        });
-
-        // Track dates
-        const entryDate = new Date(entry.date);
-        if (entryDate < earliestDate) earliestDate = entryDate;
-        if (entryDate > latestDate) latestDate = entryDate;
-      }
-    });
-
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    const days = watched.length > 0 ? Math.ceil((new Date().getTime() - earliestDate.getTime()) / (1000 * 60 * 60 * 24)) : 0;
-    const perMonth = watched.length > 0 ? (watched.length / Math.max(1, Math.ceil(days / 30))).toFixed(1) : '0';
-    const favoriteGenre = Object.entries(genreMap).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Unknown';
-    const watchedMovieCount = watched.filter(entry => entry.type === 'movie').length;
-    const memoryCount = watchedMovieCount + watchedTvEpisodeCount;
-
-    return { hours, minutes, days, perMonth, favoriteGenre, titleCount: watched.length, memoryCount };
-  }, [entries]);
+  const timeTogether = useMemo(() => calculateIntroStats(entries), [entries]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-night-900 via-purple-900/20 to-night-900 flex items-center justify-center p-4">

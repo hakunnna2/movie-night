@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
+import { Download } from 'lucide-react';
 import { BrowserRouter, Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { getEntriesAsync } from './services/storage';
 import { MovieEntry } from './types';
@@ -12,6 +13,11 @@ const Details = lazy(() => import('./views/Details').then(m => ({ default: m.Det
 const IntroPage = lazy(() => import('./views/IntroPage').then(m => ({ default: m.IntroPage })));
 const SELECTED_USER_KEY = 'movie-night-selected-user';
 
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+};
+
 // Loading fallback component for Suspense boundaries
 const LoadingFallback = () => (
   <div className="min-h-screen bg-night-900 flex items-center justify-center">
@@ -23,6 +29,74 @@ const LoadingFallback = () => (
     </div>
   </div>
 );
+
+const InstallAppButton = () => {
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [canInstall, setCanInstall] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(() => {
+    try {
+      return window.matchMedia('(display-mode: standalone)').matches || (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setDeferredPrompt(event as BeforeInstallPromptEvent);
+      setCanInstall(true);
+    };
+
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setCanInstall(false);
+      setDeferredPrompt(null);
+    };
+
+    const standaloneQuery = window.matchMedia('(display-mode: standalone)');
+    const handleDisplayModeChange = () => {
+      setIsInstalled(standaloneQuery.matches);
+    };
+
+    if (standaloneQuery.matches) {
+      setIsInstalled(true);
+    }
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener);
+    window.addEventListener('appinstalled', handleAppInstalled);
+    standaloneQuery.addEventListener('change', handleDisplayModeChange);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+      standaloneQuery.removeEventListener('change', handleDisplayModeChange);
+    };
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+
+    await deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    setDeferredPrompt(null);
+    setCanInstall(false);
+  };
+
+  if (!canInstall || isInstalled) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={handleInstall}
+      className="fixed bottom-5 right-5 z-[70] flex items-center gap-2 rounded-full border border-white/10 bg-night-900/90 px-4 py-3 text-sm font-bold text-white shadow-2xl shadow-black/40 backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-popcorn/60 hover:text-popcorn focus:outline-none focus:ring-2 focus:ring-popcorn"
+      aria-label="Install this app"
+    >
+      <Download size={16} />
+      Install app
+    </button>
+  );
+};
 
 const AppContent = () => {
   const [entries, setEntries] = useState<MovieEntry[]>([]);
@@ -80,11 +154,7 @@ const AppContent = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-night-900 flex items-center justify-center">
-        <div className="text-popcorn text-xl">Loading...</div>
-      </div>
-    );
+    return <LoadingFallback />;
   }
 
   // Router Logic
@@ -154,6 +224,7 @@ const App = () => (
         <div className="min-h-screen bg-night-900 text-ink-100 font-sans selection:bg-popcorn selection:text-night-900">
           <AppContent />
           <ScrollToTopButton />
+          <InstallAppButton />
         </div>
       </AppContextProvider>
     </BrowserRouter>
