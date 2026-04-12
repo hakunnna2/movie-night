@@ -10,6 +10,7 @@ interface DetailsProps {
   entry: MovieEntry;
   onBack: () => void;
   selectedUser?: 'jojo' | 'dodo' | null;
+  onRatingUpdate?: () => Promise<void>;
 }
 
 // Watchdog component at module scope to avoid re-creation on every render
