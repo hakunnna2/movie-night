@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, SyntheticEvent, MouseEvent, useRef } from 'react';
-import { ArrowLeft, Download, X, ChevronLeft, ChevronRight, PlayCircle } from 'lucide-react';
+import { ArrowLeft, Download, X, ChevronLeft, ChevronRight, PlayCircle, RefreshCw } from 'lucide-react';
 import { MovieEntry } from '../types';
 import { ImageWithSkeleton } from '../components/ImageWithSkeleton';
 import { useSwipe } from '../hooks/useSwipe';
@@ -101,10 +101,25 @@ export const Details = ({ entry, onBack, selectedUser }: DetailsProps) => {
     : entry.videos?.[0]?.type === 'local';
   
   const isGoogleDriveUrl = safeVideoUrl?.includes('drive.google.com');
+
+  const getGoogleDriveFileId = (url: string) => {
+    const patterns = [
+      /\/file\/d\/([a-zA-Z0-9_-]+)/,
+      /\/d\/([a-zA-Z0-9_-]+)/,
+      /[?&]id=([a-zA-Z0-9_-]+)/,
+    ];
+
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match?.[1]) return match[1];
+    }
+
+    return null;
+  };
   
   const getEmbedUrl = (url: string) => {
-    const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
-    return match?.[1] ? `https://drive.google.com/file/d/${match[1]}/preview` : url;
+    const fileId = getGoogleDriveFileId(url);
+    return fileId ? `https://drive.google.com/file/d/${fileId}/preview` : url;
   };
 
   const [iframeLoaded, setIframeLoaded] = useState(false);
@@ -156,7 +171,11 @@ export const Details = ({ entry, onBack, selectedUser }: DetailsProps) => {
   const handleDownload = () => {
     if (!safeVideoUrl) return;
     if (safeVideoUrl.includes('drive.google.com')) {
-      window.open(safeVideoUrl, '_blank');
+      const fileId = getGoogleDriveFileId(safeVideoUrl);
+      const downloadUrl = fileId
+        ? `https://drive.google.com/uc?export=download&id=${fileId}`
+        : safeVideoUrl;
+      window.open(downloadUrl, '_blank');
     } else {
       const a = document.createElement('a');
       a.href = safeVideoUrl;
@@ -167,10 +186,18 @@ export const Details = ({ entry, onBack, selectedUser }: DetailsProps) => {
     }
   };
 
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
   const getExternalVideoLink = (url?: string) => {
     if (!url) return null;
     try {
       const u = new URL(url, window.location.origin);
+      if (u.hostname.includes('drive.google.com')) {
+        const fileId = getGoogleDriveFileId(url);
+        return fileId ? `https://drive.google.com/file/d/${fileId}/view` : url;
+      }
       if (u.hostname.includes('youtube.com') && u.pathname.startsWith('/embed/')) {
         const id = u.pathname.split('/embed/')[1];
         return id ? `https://www.youtube.com/watch?v=${id}` : url;
@@ -329,6 +356,16 @@ export const Details = ({ entry, onBack, selectedUser }: DetailsProps) => {
                 <span className="text-[10px] font-bold text-green-400/80">Download</span>
               </button>
             )}
+
+            <button
+              onClick={handleRefresh}
+              aria-label="Refresh page"
+              title="Refresh"
+              className="flex items-center gap-1.5 bg-sky-400/15 px-3 py-2 rounded-full hover:bg-sky-400/25 transition-colors focus:outline-none focus:ring-2 focus:ring-sky-400/50"
+            >
+              <RefreshCw size={16} className="text-sky-400" />
+              <span className="text-[10px] font-bold text-sky-400/80">Refresh</span>
+            </button>
           </div>
         </div>
 

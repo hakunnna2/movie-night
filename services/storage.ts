@@ -134,7 +134,7 @@ const MOVIES_DATA: MovieEntry[] = [
     "status": "watched",
     "date": "2026-04-08",
     "genres": ["Drama", "Family", "Psychological"],
-    "duration": "Weekly Series • 12 Episodes Total",
+    "duration": "Weekly Series • 13 Episodes Total",
     "episodeRuntimeMinutes": 190,
     "story": "The Turkish series Abi (My Brother) revolves around the idea that family is a true test. It follows the story of Çağla, a lawyer who was pushed into her profession by the harshness of life and the absence of a real family. On the other side stands Doğan, a man from a large and wealthy family who ran away in an attempt to escape a past filled with secrets. But life forces a confrontation, and the doors to a deep relationship open, where each of them carries postponed wounds—wounds they can neither open nor close… wounds called family. New episodes air weekly.",
     "posterUrl": "/assets/ABIM/abi.png",
@@ -225,6 +225,13 @@ const MOVIES_DATA: MovieEntry[] = [
         "summary": "A new turning point pushes Çağla and Doğan to face one final emotional test, where the meaning of loyalty, family, and forgiveness is redefined.",
         "date": "2026-04-08",
         "status": "watched"
+      },
+      {
+        "number": 13,
+        "title": "Episode 13 - Duydun mu kalbimi?",
+        "summary": "Did you hear my heart? It's beating so strongly... In an episode that begins with Doğan opening his eyes at the mansion after being seriously wounded, the family balance is shaken beyond repair. As the secrets behind Melek being forced to marry Yılmaz slowly come to light, Doğan realizes how heavy a burden his sister has been carrying and reaches a point where he is ready to sacrifice his own life to protect her. Meanwhile, Genco comes face to face with death under Tahir's orders, while Çağla is caught between two fires and tries to save both Doğan and Genco. The marriage carried out under Tahir's pressure is not surrender for Melek, but a price she pays to save her brother. At the courthouse, Doğan prepares to take the blame, but Tahir changing his statement at the last moment turns everything upside down and Doğan regains his freedom. However, the true intention behind this decision and the weight of the crime Melek carries deepen the family conflict even further and open the door to a new reckoning.",
+        "date": "2026-04-15",
+        "status": "upcoming"
       }
     ],
     "videos": [

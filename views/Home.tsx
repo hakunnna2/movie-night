@@ -4,7 +4,7 @@ import { MovieEntry, FilterType, SortOption } from '../types';
 import { MovieCard } from '../components/MovieCard';
 import { FilterBar } from '../components/FilterBar';
 import { NotificationContainer, Notification, NotificationType } from '../components/NotificationToast';
-import { Search, X, Ticket, Film, Sparkles, Armchair } from 'lucide-react';
+import { Search, X, Ticket, Sparkles, Armchair } from 'lucide-react';
 
 interface HomeProps {
   entries: MovieEntry[];
