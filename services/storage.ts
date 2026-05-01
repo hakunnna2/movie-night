@@ -238,7 +238,7 @@ const MOVIES_DATA: MovieEntry[] = [
         "title": "Episode 14",
         "summary": "The fallout from Tahir's shocking decision forces Çağla and Doğan into a fragile alliance, while Melek's sacrifice becomes the center of a painful family reckoning that could change everything.",
         "date": "2026-04-22",
-        "status": "upcoming"
+        "status": "watched"
       }
     ],
     "videos": [
